@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.naskoni.library.dao.UserDao;
 import com.naskoni.library.entity.User;
 import com.naskoni.library.enumeration.Status;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,11 +18,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
   public static final String USER_NOT_FOUND = "User with name: %s could not be found";
 
-  @Autowired private UserDao userDao;
+  private final UserDao userDao;
 
   @Transactional(readOnly = true)
   @Override

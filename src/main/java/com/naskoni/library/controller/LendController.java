@@ -4,8 +4,8 @@ import com.naskoni.library.dto.LendRequestDto;
 import com.naskoni.library.dto.LendResponseDto;
 import com.naskoni.library.service.LendService;
 import io.swagger.annotations.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -20,9 +20,10 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/lends")
 @Secured({"ROLE_USER", "ROLE_ADMIN"})
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class LendController {
 
-  @Autowired private LendService lendService;
+  private final LendService lendService;
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)

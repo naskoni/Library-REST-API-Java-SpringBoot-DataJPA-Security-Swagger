@@ -13,8 +13,8 @@ import com.naskoni.library.exception.NotFoundException;
 import com.naskoni.library.security.AuthenticationFacade;
 import com.naskoni.library.service.ClientService;
 import com.naskoni.library.specification.SpecificationsBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,15 +25,16 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 
 @Service
+@RequiredArgsConstructor
 public class ClientServiceImpl implements ClientService {
 
   public static final String CLIENT_NOT_FOUND = "Client with id: %d could not be found";
   public static final String CLIENT_IN_USE = "Client with id: %d is currently in use";
 
-  @Autowired private ClientDao clientDao;
-  @Autowired private LendDao lendDao;
-  @Autowired private UserDao userDao;
-  @Autowired private AuthenticationFacade authenticationFacade;
+  private final ClientDao clientDao;
+  private final LendDao lendDao;
+  private final UserDao userDao;
+  private final AuthenticationFacade authenticationFacade;
 
   @Override
   @Transactional
@@ -82,6 +83,7 @@ public class ClientServiceImpl implements ClientService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public ClientResponseDto findOne(Long id) {
     Optional<Client> optionalClient = clientDao.findById(id);
     if (optionalClient.isPresent()) {
@@ -92,6 +94,7 @@ public class ClientServiceImpl implements ClientService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public Page<ClientResponseDto> findAll(String search, Pageable pageable) {
     SpecificationsBuilder<Client> builder = new SpecificationsBuilder<>();
     Matcher matcher = Helper.getMatcher(search);

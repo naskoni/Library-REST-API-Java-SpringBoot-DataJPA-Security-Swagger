@@ -10,7 +10,6 @@ import com.naskoni.library.exception.CurrentlyInUseException;
 import com.naskoni.library.exception.NotFoundException;
 import com.naskoni.library.security.AuthenticationFacade;
 import com.naskoni.library.specification.SpecificationsBuilder;
-import com.naskoni.library.util.BooksCreator;
 import com.naskoni.library.util.ClientsCreator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +32,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-public class ClientServiceTest {
+class ClientServiceTest {
 
   @Mock private ClientDao clientDao;
   @Mock private LendDao lendDao;
@@ -51,6 +50,7 @@ public class ClientServiceTest {
     when(authenticationFacade.getAuthentication()).thenReturn(authentication);
     when(authentication.getName()).thenReturn("user");
     when(clientDao.save(client)).thenReturn(client);
+
     ClientResponseDto clientResponseDto = clientService.create(clientRequestDto);
 
     assertEquals(client.getId(), clientResponseDto.getId());
@@ -66,6 +66,7 @@ public class ClientServiceTest {
 
     when(clientDao.findById(anyLong())).thenReturn(Optional.of(client));
     when(clientDao.save(client)).thenReturn(client);
+
     ClientResponseDto clientResponseDto = clientService.update(1L, clientRequestDto);
 
     assertEquals(client.getId(), clientResponseDto.getId());
@@ -86,7 +87,14 @@ public class ClientServiceTest {
     when(clientDao.findById(anyLong())).thenReturn(Optional.of(client));
     when(lendDao.findByClient(client)).thenReturn(Optional.empty());
     doNothing().when(clientDao).delete(client);
+
     clientService.delete(1L);
+
+    verify(clientDao).findById(anyLong());
+    verify(clientDao).delete(client);
+    verify(lendDao).findByClient(client);
+    verifyNoMoreInteractions(clientDao);
+    verifyNoMoreInteractions(lendDao);
   }
 
   @Test
@@ -132,10 +140,12 @@ public class ClientServiceTest {
     Specification<Client> spec = builder.build();
     Mockito.when(clientDao.findAll(spec, pageable)).thenReturn(page);
     Page<ClientResponseDto> clientDtos = clientService.findAll(null, pageable);
+
     assertEquals(10, clientDtos.getContent().size());
 
     ClientResponseDto clientDto = clientDtos.iterator().next();
     Client client = clients.get(0);
+
     assertEquals(client.getId(), clientDto.getId());
     assertEquals(client.getName(), clientDto.getName());
     assertEquals(client.getBirthdate(), clientDto.getBirthdate());

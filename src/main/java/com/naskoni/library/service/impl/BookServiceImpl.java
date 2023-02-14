@@ -13,8 +13,8 @@ import com.naskoni.library.exporter.Exporter;
 import com.naskoni.library.exporter.ExporterFactory;
 import com.naskoni.library.service.BookService;
 import com.naskoni.library.specification.SpecificationsBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -27,14 +27,15 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 
 @Service
+@RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
 
   public static final String BOOK_NOT_FOUND = "Book with id: %d could not be found";
   public static final String BOOK_IN_USE = "Book with id: %d is currently in use";
 
-  @Autowired private BookDao bookDao;
-  @Autowired private LendDao lendDao;
-  @Autowired private ExporterFactory exporterFactory;
+  private final BookDao bookDao;
+  private final LendDao lendDao;
+  private final ExporterFactory exporterFactory;
 
   @Override
   @Transactional
@@ -77,6 +78,7 @@ public class BookServiceImpl implements BookService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public BookResponseDto findOne(Long id) {
     Optional<Book> optionalBook = bookDao.findById(id);
     if (optionalBook.isPresent()) {
@@ -87,6 +89,7 @@ public class BookServiceImpl implements BookService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public Page<BookResponseDto> findAll(String search, Pageable pageable) {
     SpecificationsBuilder<Book> builder = new SpecificationsBuilder<>();
     Matcher matcher = Helper.getMatcher(search);
@@ -100,6 +103,7 @@ public class BookServiceImpl implements BookService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public byte[] export(String type) throws IOException {
     List<Book> books = bookDao.findAll();
     Exporter exporter = exporterFactory.newInstance(type);

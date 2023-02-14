@@ -1,33 +1,33 @@
-# Library REST 2020
+# Library REST 2023
 
-### The project from 2016 refactored as a REST API and updated to the latest versions of:
-  - Java 14,
-  - Spring Boot 2.3.0.RELEASE,
-  - Spring Security 5.3.2,
-  - Spring MVC 5.2.6,
-  - Spring Data JPA 2.3.0.RELEASE,
+### The project from 2016 refactored as a REST API and updated to the following versions of:
+  - Java 19,
+  - Spring Boot 2.5.14,
+  - Spring Security 5.5.8,
+  - Spring MVC 5.3.2,
+  - Spring Data JPA 2.5.14,
   - SpringFox Swagger 2.9.2,
-  - JUnit 5.6.2,
-  - Gradle 6.3
+  - JUnit 5.7.2,
+  - Gradle 8.0
   
 ### Prerequisites
-    - Java 14 JRE or JDK installed
+    - Java 19 JRE or JDK installed
     - MySQL installed with created schema 'library' or PostgreSQL, if not - the application can be started
      with built-in H2 in-memory DB. You can use any DB you want, but the corresponding dependency must be
      added to 'build.gradle'.
         
 ### Environment variables
 
-By default the H2 in-memory DB will be used.
+By default, the H2 in-memory DB will be used.
 The application rely on environment variables in order to run with DB of your choice.
 These need to be set up in your environment or in the Run Configuration of your IDE:
 
-    - library.db.username (default is 'sa')
-    - library.db.password (default is 'sa')
-    - library.db.url - examples: H2: 'jdbc:h2:mem:test' (default),
+    - LIBRARY.DB.URL (default is 'sa')
+    - LIBRARY.DB.USERNAME (default is 'sa')
+    - LIBRARY.DB.PASSWORD - examples: H2: 'jdbc:h2:mem:test' (default),
                                  MySQL: 'jdbc:mysql://localhost/library',
                                  PostgreSQL: 'jdbc:postgresql://localhost:5432/postgres'
-    - library.ddl (default is 'create')
+    - LIBRARY.DDL (default is 'create')
   
 ### Application can be expanded without recompiling
 

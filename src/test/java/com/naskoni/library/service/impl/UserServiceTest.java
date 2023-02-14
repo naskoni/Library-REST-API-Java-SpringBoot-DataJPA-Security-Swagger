@@ -33,7 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-public class UserServiceTest {
+class UserServiceTest {
 
   @Mock private UserDao userDao;
   @Mock private AuthenticationFacade authenticationFacade;

@@ -5,8 +5,8 @@ import com.naskoni.library.dto.UserRequestDto;
 import com.naskoni.library.dto.UserResponseDto;
 import com.naskoni.library.service.UserService;
 import io.swagger.annotations.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,9 +21,10 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/users")
 @Secured("ROLE_ADMIN")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class UserController {
 
-  @Autowired private UserService userService;
+  private final UserService userService;
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)

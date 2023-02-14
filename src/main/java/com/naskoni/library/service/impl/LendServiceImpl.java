@@ -13,8 +13,8 @@ import com.naskoni.library.entity.Lend;
 import com.naskoni.library.exception.NotFoundException;
 import com.naskoni.library.service.LendService;
 import com.naskoni.library.specification.SpecificationsBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -28,15 +28,14 @@ import static com.naskoni.library.service.impl.BookServiceImpl.BOOK_NOT_FOUND;
 import static com.naskoni.library.service.impl.ClientServiceImpl.CLIENT_NOT_FOUND;
 
 @Service
+@RequiredArgsConstructor
 public class LendServiceImpl implements LendService {
 
   public static final String LEND_NOT_FOUND = "Lend with id: %d could not be found";
 
-  @Autowired private LendDao lendDao;
-
-  @Autowired private BookDao bookDao;
-
-  @Autowired private ClientDao clientDao;
+  private final LendDao lendDao;
+  private final BookDao bookDao;
+  private final ClientDao clientDao;
 
   @Transactional
   @Override
@@ -60,6 +59,7 @@ public class LendServiceImpl implements LendService {
     }
   }
 
+  @Transactional(readOnly = true)
   @Override
   public LendResponseDto findOne(Long id) {
     Optional<Lend> optionalLend = lendDao.findById(id);
@@ -70,6 +70,7 @@ public class LendServiceImpl implements LendService {
     }
   }
 
+  @Transactional(readOnly = true)
   @Override
   public Page<LendResponseDto> findAll(String search, Pageable pageable) {
     SpecificationsBuilder<Lend> builder = new SpecificationsBuilder<>();

@@ -22,16 +22,16 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-public class BookServiceTest {
+class BookServiceTest {
 
   @Mock private BookDao bookDao;
   @Mock private LendDao lendDao;
@@ -82,7 +82,14 @@ public class BookServiceTest {
     when(bookDao.findById(anyLong())).thenReturn(Optional.of(book));
     when(lendDao.findByBook(book)).thenReturn(Optional.empty());
     doNothing().when(bookDao).delete(book);
+
     bookService.delete(1L);
+
+    verify(bookDao).findById(anyLong());
+    verify(bookDao).delete(book);
+    verify(lendDao).findByBook(book);
+    verifyNoMoreInteractions(bookDao);
+    verifyNoMoreInteractions(lendDao);
   }
 
   @Test
@@ -141,13 +148,13 @@ public class BookServiceTest {
   }
 
   @Test
-  public void exportShouldSuccess() throws IOException {
+  void exportShouldSuccess() throws IOException {
     when(bookDao.findAll()).thenReturn(BooksCreator.getBooks());
     when(exporterFactory.newInstance("csv")).thenReturn(new CsvFileExporter());
     byte[] export = bookService.export("csv");
     assertNotNull(export);
 
-    String asString = new String(export, "UTF-8");
+    String asString = new String(export, StandardCharsets.UTF_8);
     assertTrue(asString.contains("author,created,id,isbn,name,updated,year"));
     assertTrue(asString.contains("author,,,1645712740,name,,1999"));
   }

@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-public class LendServiceTest {
+class LendServiceTest {
 
   @Mock private LendDao lendDao;
   @Mock private BookDao bookDao;

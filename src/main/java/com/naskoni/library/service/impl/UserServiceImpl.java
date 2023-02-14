@@ -13,8 +13,8 @@ import com.naskoni.library.exception.UserDeactivatedException;
 import com.naskoni.library.security.AuthenticationFacade;
 import com.naskoni.library.service.UserService;
 import com.naskoni.library.specification.SpecificationsBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
   public static final String USER_NOT_FOUND = "User with id: %d could not be found";
@@ -34,8 +35,8 @@ public class UserServiceImpl implements UserService {
       "User with id: %d is logged and cannot deactivate himself.";
   public static final String USERNAME_EXIST = "username: %s already exists";
 
-  @Autowired private UserDao userDao;
-  @Autowired private AuthenticationFacade authenticationFacade;
+  private final UserDao userDao;
+  private final AuthenticationFacade authenticationFacade;
 
   @Transactional
   @Override
@@ -63,7 +64,7 @@ public class UserServiceImpl implements UserService {
     if (optionalUser.isPresent()) {
       User user = optionalUser.get();
       Optional<User> optionalbyUsername = userDao.findByUsername(userRequestDto.getUsername());
-      if (optionalbyUsername.isPresent() && optionalbyUsername.get().getId() != id) {
+      if (optionalbyUsername.isPresent() && !optionalbyUsername.get().getId().equals(id)) {
         throw new DuplicateException(String.format(USERNAME_EXIST, userRequestDto.getUsername()));
       }
 
@@ -104,6 +105,7 @@ public class UserServiceImpl implements UserService {
     }
   }
 
+  @Transactional(readOnly = true)
   @Override
   public UserResponseDto findOne(Long id) {
     Optional<User> optionalUser = userDao.findById(id);
@@ -114,7 +116,7 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   @Override
   public Page<UserResponseDto> findAll(String search, Pageable pageable) {
     SpecificationsBuilder<User> builder = new SpecificationsBuilder<>();
