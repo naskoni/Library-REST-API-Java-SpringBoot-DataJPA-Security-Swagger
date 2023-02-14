@@ -1306,30 +1306,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "Info",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "localhost:8080/library/api/actuator/info",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"library",
-								"api",
-								"actuator",
-								"info"
-							]
-						}
-					},
-					"response": []
 				}
 			],
 			"protocolProfileBehavior": {}

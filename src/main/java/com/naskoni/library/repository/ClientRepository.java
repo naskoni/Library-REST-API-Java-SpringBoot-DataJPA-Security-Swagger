@@ -1,7 +1,7 @@
-package com.naskoni.library.dao;
+package com.naskoni.library.repository;
 
 import com.naskoni.library.entity.Client;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface ClientDao extends JpaRepository<Client, Long>, JpaSpecificationExecutor<Client> {}
+public interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecificationExecutor<Client> {}

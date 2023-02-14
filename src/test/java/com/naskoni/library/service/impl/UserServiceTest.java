@@ -1,6 +1,6 @@
 package com.naskoni.library.service.impl;
 
-import com.naskoni.library.dao.UserDao;
+import com.naskoni.library.repository.UserRepository;
 import com.naskoni.library.dto.UserResponseDto;
 import com.naskoni.library.entity.User;
 import com.naskoni.library.enumeration.Status;
@@ -33,9 +33,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-public class UserServiceTest {
+class UserServiceTest {
 
-  @Mock private UserDao userDao;
+  @Mock private UserRepository userRepository;
   @Mock private AuthenticationFacade authenticationFacade;
 
   @InjectMocks private UserServiceImpl userService;
@@ -45,7 +45,7 @@ public class UserServiceTest {
     var userRequestDto = UsersCreator.getUserRequestDto();
     User user = userService.mapToEntity(userRequestDto);
 
-    when(userDao.save(any())).thenReturn(user);
+    when(userRepository.save(any())).thenReturn(user);
     UserResponseDto userResponseDto = userService.create(userRequestDto);
 
     assertEquals(user.getId(), userResponseDto.getId());
@@ -58,7 +58,7 @@ public class UserServiceTest {
   @Test
   void createWithWithUsernameInUseByOtherUserShouldThrowDuplicateException() {
     var userRequestDto = UsersCreator.getUserRequestDto();
-    when(userDao.findByUsername(anyString())).thenReturn(Optional.of(new User()));
+    when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(new User()));
     assertThrows(DuplicateException.class, () -> userService.create(userRequestDto));
   }
 
@@ -67,8 +67,8 @@ public class UserServiceTest {
     var userRequestDto = UsersCreator.getUserRequestDto();
     User user = userService.mapToEntity(userRequestDto);
 
-    when(userDao.findById(anyLong())).thenReturn(Optional.of(user));
-    when(userDao.save(any())).thenReturn(user);
+    when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+    when(userRepository.save(any())).thenReturn(user);
     UserResponseDto userResponseDto = userService.update(1L, userRequestDto);
 
     assertEquals(user.getId(), userResponseDto.getId());
@@ -91,8 +91,8 @@ public class UserServiceTest {
     User userByUsername = userService.mapToEntity(userRequestDto);
     userByUsername.setId(2L);
 
-    when(userDao.findById(anyLong())).thenReturn(Optional.of(userById));
-    when(userDao.findByUsername(anyString())).thenReturn(Optional.of(userByUsername));
+    when(userRepository.findById(anyLong())).thenReturn(Optional.of(userById));
+    when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(userByUsername));
     assertThrows(DuplicateException.class, () -> userService.update(1L, userRequestDto));
   }
 
@@ -101,8 +101,8 @@ public class UserServiceTest {
     var userRequestDto = UsersCreator.getUserRequestDto();
     User user = userService.mapToEntity(userRequestDto);
 
-    when(userDao.findById(anyLong())).thenReturn(Optional.of(user));
-    when(userDao.save(any())).thenReturn(user);
+    when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+    when(userRepository.save(any())).thenReturn(user);
     Authentication authentication = mock(Authentication.class);
     when(authenticationFacade.getAuthentication()).thenReturn(authentication);
     when(authentication.getName()).thenReturn("admin");
@@ -126,7 +126,7 @@ public class UserServiceTest {
     User user = userService.mapToEntity(userRequestDto);
     user.setStatus(Status.DEACTIVATED);
 
-    when(userDao.findById(anyLong())).thenReturn(Optional.of(user));
+    when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
     assertThrows(UserDeactivatedException.class, () -> userService.deactivate(1L));
   }
 
@@ -138,7 +138,7 @@ public class UserServiceTest {
     Authentication authentication = mock(Authentication.class);
     when(authenticationFacade.getAuthentication()).thenReturn(authentication);
     when(authentication.getName()).thenReturn("user");
-    when(userDao.findById(anyLong())).thenReturn(Optional.of(user));
+    when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
     assertThrows(CurrentlyInUseException.class, () -> userService.deactivate(1L));
   }
 
@@ -146,7 +146,7 @@ public class UserServiceTest {
   void findOneShouldSuccess() {
     var user = UsersCreator.getUser();
 
-    when(userDao.findById(anyLong())).thenReturn(Optional.of(user));
+    when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
     UserResponseDto userResponseDto = userService.findOne(1L);
 
     assertEquals(user.getId(), userResponseDto.getId());
@@ -169,7 +169,7 @@ public class UserServiceTest {
     Pageable pageable = Pageable.unpaged();
     SpecificationsBuilder<User> builder = new SpecificationsBuilder<>();
     Specification<User> spec = builder.build();
-    Mockito.when(userDao.findAll(spec, pageable)).thenReturn(page);
+    Mockito.when(userRepository.findAll(spec, pageable)).thenReturn(page);
     Page<UserResponseDto> userResponseDtos = userService.findAll(null, pageable);
     assertEquals(10, userResponseDtos.getContent().size());
 

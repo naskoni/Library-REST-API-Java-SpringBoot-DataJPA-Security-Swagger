@@ -2,7 +2,6 @@ package com.naskoni.library.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.naskoni.library.exporter.ExporterFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -22,7 +21,7 @@ public class WebAppConfig implements WebMvcConfigurer {
   public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
     Optional<HttpMessageConverter<?>> jsonConverterOptional =
         converters.stream()
-            .filter(c -> c instanceof MappingJackson2HttpMessageConverter)
+            .filter(MappingJackson2HttpMessageConverter.class::isInstance)
             .findFirst();
 
     if (jsonConverterOptional.isPresent()) {
@@ -35,7 +34,7 @@ public class WebAppConfig implements WebMvcConfigurer {
 
     Optional<HttpMessageConverter<?>> xmlConverterOptional =
         converters.stream()
-            .filter(c -> c instanceof MappingJackson2XmlHttpMessageConverter)
+            .filter(MappingJackson2XmlHttpMessageConverter.class::isInstance)
             .findFirst();
 
     if (xmlConverterOptional.isPresent()) {
@@ -49,10 +48,5 @@ public class WebAppConfig implements WebMvcConfigurer {
   @Bean
   public ShallowEtagHeaderFilter etagFilter() {
     return new ShallowEtagHeaderFilter();
-  }
-
-  @Bean
-  public ExporterFactory exporterFactory() {
-    return new ExporterFactory();
   }
 }

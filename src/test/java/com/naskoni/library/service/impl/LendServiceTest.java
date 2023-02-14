@@ -1,8 +1,8 @@
 package com.naskoni.library.service.impl;
 
-import com.naskoni.library.dao.BookDao;
-import com.naskoni.library.dao.ClientDao;
-import com.naskoni.library.dao.LendDao;
+import com.naskoni.library.repository.BookRepository;
+import com.naskoni.library.repository.ClientRepository;
+import com.naskoni.library.repository.LendRepository;
 import com.naskoni.library.dto.LendResponseDto;
 import com.naskoni.library.entity.Lend;
 import com.naskoni.library.exception.NotFoundException;
@@ -31,23 +31,23 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-public class LendServiceTest {
+class LendServiceTest {
 
-  @Mock private LendDao lendDao;
-  @Mock private BookDao bookDao;
-  @Mock private ClientDao clientDao;
+  @Mock private LendRepository lendRepository;
+  @Mock private BookRepository bookRepository;
+  @Mock private ClientRepository clientRepository;
 
   @InjectMocks private LendServiceImpl lendService;
 
   @Test
   void createShouldSuccess() {
-    when(bookDao.findById(anyLong())).thenReturn(Optional.of(BooksCreator.getBook()));
-    when(clientDao.findById(anyLong())).thenReturn(Optional.of(ClientsCreator.getClient()));
+    when(bookRepository.findById(anyLong())).thenReturn(Optional.of(BooksCreator.getBook()));
+    when(clientRepository.findById(anyLong())).thenReturn(Optional.of(ClientsCreator.getClient()));
 
     var lendRequestDto = LendsCreator.getLendRequestDto();
     Lend lend = lendService.mapToEntity(lendRequestDto);
 
-    when(lendDao.save(lend)).thenReturn(lend);
+    when(lendRepository.save(lend)).thenReturn(lend);
     LendResponseDto lendResponseDto = lendService.create(lendRequestDto);
 
     assertEquals(lend.getId(), lendResponseDto.getId());
@@ -59,14 +59,14 @@ public class LendServiceTest {
 
   @Test
   void updateExistentLendShouldSuccess() {
-    when(bookDao.findById(anyLong())).thenReturn(Optional.of(BooksCreator.getBook()));
-    when(clientDao.findById(anyLong())).thenReturn(Optional.of(ClientsCreator.getClient()));
+    when(bookRepository.findById(anyLong())).thenReturn(Optional.of(BooksCreator.getBook()));
+    when(clientRepository.findById(anyLong())).thenReturn(Optional.of(ClientsCreator.getClient()));
 
     var lendRequestDto = LendsCreator.getLendRequestDto();
     Lend lend = lendService.mapToEntity(lendRequestDto);
 
-    when(lendDao.findById(anyLong())).thenReturn(Optional.of(lend));
-    when(lendDao.save(lend)).thenReturn(lend);
+    when(lendRepository.findById(anyLong())).thenReturn(Optional.of(lend));
+    when(lendRepository.save(lend)).thenReturn(lend);
     LendResponseDto lendResponseDto = lendService.update(1L, lendRequestDto);
 
     assertEquals(lend.getId(), lendResponseDto.getId());
@@ -86,7 +86,7 @@ public class LendServiceTest {
   void findOneShouldSuccess() {
     Lend lend = LendsCreator.getLend();
 
-    when(lendDao.findById(anyLong())).thenReturn(Optional.of(lend));
+    when(lendRepository.findById(anyLong())).thenReturn(Optional.of(lend));
     LendResponseDto lendResponseDto = lendService.findOne(1L);
 
     assertEquals(lend.getId(), lendResponseDto.getId());
@@ -111,7 +111,7 @@ public class LendServiceTest {
     Pageable pageable = Pageable.unpaged();
     SpecificationsBuilder<Lend> builder = new SpecificationsBuilder<>();
     Specification<Lend> spec = builder.build();
-    Mockito.when(lendDao.findAll(spec, pageable)).thenReturn(page);
+    Mockito.when(lendRepository.findAll(spec, pageable)).thenReturn(page);
     Page<LendResponseDto> lendResponseDtos = lendService.findAll(null, pageable);
     assertEquals(1, lendResponseDtos.getContent().size());
 

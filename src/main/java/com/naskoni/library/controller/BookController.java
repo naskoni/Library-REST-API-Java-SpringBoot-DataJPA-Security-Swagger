@@ -5,8 +5,8 @@ import com.naskoni.library.dto.BookResponseDto;
 import com.naskoni.library.dto.FileTypesDto;
 import com.naskoni.library.service.BookService;
 import io.swagger.annotations.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -25,11 +25,12 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/books")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class BookController {
 
   private static final String FILE_NAME = "export.";
 
-  @Autowired private BookService bookService;
+  private final BookService bookService;
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)

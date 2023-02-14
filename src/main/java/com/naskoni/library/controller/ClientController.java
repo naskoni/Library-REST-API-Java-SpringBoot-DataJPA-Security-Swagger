@@ -4,8 +4,8 @@ import com.naskoni.library.dto.ClientRequestDto;
 import com.naskoni.library.dto.ClientResponseDto;
 import com.naskoni.library.service.ClientService;
 import io.swagger.annotations.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -19,9 +19,10 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping("/clients")
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class ClientController {
 
-  @Autowired private ClientService clientService;
+  private final ClientService clientService;
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)

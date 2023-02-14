@@ -4,6 +4,7 @@ import com.naskoni.library.exception.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -20,6 +21,7 @@ import java.util.*;
  * @version 1.0.0
  */
 @Slf4j
+@Component
 public class ExporterFactory {
 
   private static final String PACKAGE_NAME = "com.naskoni.library.exporter.";

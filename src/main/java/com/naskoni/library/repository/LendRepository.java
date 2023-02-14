@@ -1,4 +1,4 @@
-package com.naskoni.library.dao;
+package com.naskoni.library.repository;
 
 import com.naskoni.library.entity.Book;
 import com.naskoni.library.entity.Client;
@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.Optional;
 
-public interface LendDao extends JpaRepository<Lend, Long>, JpaSpecificationExecutor<Lend> {
+public interface LendRepository extends JpaRepository<Lend, Long>, JpaSpecificationExecutor<Lend> {
 
   Optional<Lend> findByBook(Book book);
 

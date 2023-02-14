@@ -20,15 +20,6 @@ public class LendsCreator {
     return lend;
   }
 
-  public static List<Lend> getLends() {
-    List<Lend> lends = new ArrayList<>();
-    for (int i = 0; i < 10; i++) {
-      lends.add(getLend());
-    }
-
-    return lends;
-  }
-
   public static LendRequestDto getLendRequestDto() {
     var lend = new LendRequestDto();
     lend.setBookId(1L);

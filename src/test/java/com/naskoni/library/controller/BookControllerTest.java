@@ -9,10 +9,8 @@ import com.naskoni.library.service.BookService;
 import com.naskoni.library.util.BooksCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
@@ -23,31 +21,28 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.LinkedHashSet;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class BookControllerTest {
+class BookControllerTest {
 
   private static final String BOOKS_URI_WITH_PARAM = "/books/1";
   private static final String BOOKS_URI = "/books";
   private static final String RESPONSE =
       "{\"id\":1,\"created\":null,\"updated\":null,\"name\":\"Don Quixote\",\"author\":\"Miguel de Cervantes\",\"year\":1999,\"isbn\":\"1645712740\"}";
+  public static final String SUPPORTED_FILE_TYPES = "{\"supportedFileTypes\":[\"csv\",\"xls\"]}";
+
+  private final Gson gson = new Gson();
   private MockMvc mockMvc;
-
-  @InjectMocks private BookController bookController;
-
   @Mock private BookService bookService;
 
-  private Gson gson = new Gson();
-
   @BeforeEach
-  public void setUp() {
-    MockitoAnnotations.initMocks(this);
+  void setUp() {
+    MockitoAnnotations.openMocks(this);
+    BookController bookController = new BookController(bookService);
     this.mockMvc =
         MockMvcBuilders.standaloneSetup(bookController)
             .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
@@ -56,7 +51,7 @@ public class BookControllerTest {
   }
 
   @Test
-  public void createWithValidDtoShouldReturnHttpCreated() throws Exception {
+  void createWithValidDtoShouldReturnHttpCreated() throws Exception {
     String json = gson.toJson(BooksCreator.getBookRequestDto());
 
     when(bookService.create(any())).thenReturn(BooksCreator.getBookResponseDto());
@@ -70,33 +65,35 @@ public class BookControllerTest {
                     .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isCreated())
             .andReturn();
+
     String content = mvcResult.getResponse().getContentAsString();
+
     assertNotNull(content);
-    assertTrue(content.equals(RESPONSE));
-    verify(bookService, times(1)).create(any());
+    assertEquals(RESPONSE, content);
+
+    verify(bookService).create(any());
     verifyNoMoreInteractions(bookService);
   }
 
   @Test
-  public void createWithInvalidDtoShouldFailHttpBadRequest() throws Exception {
+  void createWithInvalidDtoShouldFailHttpBadRequest() throws Exception {
     String json = gson.toJson(new BookRequestDto());
 
-    MvcResult mvcResult =
-        mockMvc
-            .perform(
-                post(BOOKS_URI)
-                    .content(json)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-    mvcResult.getResolvedException().getClass().equals(MethodArgumentNotValidException.class);
+    mockMvc
+        .perform(
+            post(BOOKS_URI)
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest())
+        .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException));
+
     verify(bookService, times(0)).create(any());
     verifyNoMoreInteractions(bookService);
   }
 
   @Test
-  public void updateWithValidDtoShouldReturnHttpOk() throws Exception {
+  void updateWithValidDtoShouldReturnHttpOk() throws Exception {
     String json = gson.toJson(BooksCreator.getBookResponseDto());
 
     when(bookService.update(anyLong(), any())).thenReturn(BooksCreator.getBookResponseDto());
@@ -110,82 +107,84 @@ public class BookControllerTest {
                     .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
+
     String content = mvcResult.getResponse().getContentAsString();
+
     assertNotNull(content);
-    assertTrue(content.equals(RESPONSE));
-    verify(bookService, times(1)).update(any(), any());
+    assertEquals(RESPONSE, content);
+
+    verify(bookService).update(any(), any());
     verifyNoMoreInteractions(bookService);
   }
 
   @Test
-  public void updateWithInvalidDtoShouldFailHttpBadRequest() throws Exception {
+  void updateWithInvalidDtoShouldFailHttpBadRequest() throws Exception {
     String json = gson.toJson(new BookRequestDto());
 
-    MvcResult mvcResult =
-        mockMvc
-            .perform(
-                put(BOOKS_URI_WITH_PARAM)
-                    .content(json)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-    assertTrue(
-        mvcResult.getResolvedException().getClass().equals(MethodArgumentNotValidException.class));
+    mockMvc
+        .perform(
+            put(BOOKS_URI_WITH_PARAM)
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest())
+        .andExpect(result -> assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException));
+
     verify(bookService, times(0)).update(any(), any());
     verifyNoMoreInteractions(bookService);
   }
 
   @Test
-  public void updateNonExistentBookShouldFailHttpNotFound() throws Exception {
+  void updateNonExistentBookShouldFailHttpNotFound() throws Exception {
     String json = gson.toJson(BooksCreator.getBookResponseDto());
 
     doThrow(new NotFoundException("")).when(bookService).update(anyLong(), any());
 
-    MvcResult mvcResult =
-        mockMvc
-            .perform(
-                put(BOOKS_URI_WITH_PARAM)
-                    .content(json)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isNotFound())
-            .andReturn();
-    assertTrue(mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
-    verify(bookService, times(1)).update(anyLong(), any());
+    mockMvc
+        .perform(
+            put(BOOKS_URI_WITH_PARAM)
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException));
+
+    verify(bookService).update(anyLong(), any());
     verifyNoMoreInteractions(bookService);
   }
 
   @Test
-  public void deleteExistentBookShouldReturnHttpNoContent() throws Exception {
+  void deleteExistentBookShouldReturnHttpNoContent() throws Exception {
     doNothing().when(bookService).delete(anyLong());
     mockMvc.perform(delete(BOOKS_URI_WITH_PARAM)).andExpect(status().isNoContent());
   }
 
   @Test
-  public void deleteNonExistentBookShouldFailHttpNotFound() throws Exception {
+  void deleteNonExistentBookShouldFailHttpNotFound() throws Exception {
     doThrow(new NotFoundException("")).when(bookService).delete(anyLong());
 
-    MvcResult mvcResult =
-        mockMvc.perform(delete(BOOKS_URI_WITH_PARAM)).andExpect(status().isNotFound()).andReturn();
-    assertTrue(mvcResult.getResolvedException().getClass().equals(NotFoundException.class));
-    verify(bookService, times(1)).delete(anyLong());
+    mockMvc.perform(delete(BOOKS_URI_WITH_PARAM))
+          .andExpect(status().isNotFound())
+          .andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException));
+
+    verify(bookService).delete(anyLong());
     verifyNoMoreInteractions(bookService);
   }
 
   @Test
-  public void deleteBookInUseShouldFailHttpConflict() throws Exception {
+  void deleteBookInUseShouldFailHttpConflict() throws Exception {
     doThrow(new CurrentlyInUseException("")).when(bookService).delete(anyLong());
 
-    MvcResult mvcResult =
-        mockMvc.perform(delete(BOOKS_URI_WITH_PARAM)).andExpect(status().isConflict()).andReturn();
-    assertTrue(mvcResult.getResolvedException().getClass().equals(CurrentlyInUseException.class));
-    verify(bookService, times(1)).delete(anyLong());
+    mockMvc.perform(delete(BOOKS_URI_WITH_PARAM))
+            .andExpect(status().isConflict())
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof CurrentlyInUseException));
+
+    verify(bookService).delete(anyLong());
     verifyNoMoreInteractions(bookService);
   }
 
   @Test
-  public void findOneShouldReturnHttpOk() throws Exception {
+  void findOneShouldReturnHttpOk() throws Exception {
     when(bookService.findOne(anyLong())).thenReturn(BooksCreator.getBookResponseDto());
 
     MvcResult mvcResult =
@@ -193,15 +192,18 @@ public class BookControllerTest {
             .perform(get(BOOKS_URI_WITH_PARAM).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
+
     String content = mvcResult.getResponse().getContentAsString();
+
     assertNotNull(content);
-    assertTrue(content.equals(RESPONSE));
-    verify(bookService, times(1)).findOne(anyLong());
+    assertEquals(RESPONSE, content);
+
+    verify(bookService).findOne(anyLong());
     verifyNoMoreInteractions(bookService);
   }
 
   @Test
-  public void findAllShouldReturnHttpOk() throws Exception {
+  void findAllShouldReturnHttpOk() throws Exception {
     when(bookService.findAll(any(), any()))
         .thenReturn(new PageImpl<>(BooksCreator.getBookResponseDtos()));
 
@@ -210,16 +212,19 @@ public class BookControllerTest {
             .perform(get(BOOKS_URI).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
+
     String content = mvcResult.getResponse().getContentAsString();
+
     assertNotNull(content);
     assertTrue(content.contains(RESPONSE));
     assertTrue(content.contains("\"totalElements\":10"));
-    verify(bookService, times(1)).findAll(any(), any());
+
+    verify(bookService).findAll(any(), any());
     verifyNoMoreInteractions(bookService);
   }
 
   @Test
-  public void retrieveSupportedFileTypesShouldReturnHttpOk() throws Exception {
+  void retrieveSupportedFileTypesShouldReturnHttpOk() throws Exception {
     String uri = "/books/files";
 
     var fileTypes = new LinkedHashSet<String>();
@@ -234,10 +239,13 @@ public class BookControllerTest {
             .perform(get(uri).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
+
     String content = mvcResult.getResponse().getContentAsString();
+
     assertNotNull(content);
-    assertTrue(content.equals("{\"supportedFileTypes\":[\"csv\",\"xls\"]}"));
-    verify(bookService, times(1)).retrieveSupportedFileTypes();
+    assertEquals(SUPPORTED_FILE_TYPES, content);
+
+    verify(bookService).retrieveSupportedFileTypes();
     verifyNoMoreInteractions(bookService);
   }
 }

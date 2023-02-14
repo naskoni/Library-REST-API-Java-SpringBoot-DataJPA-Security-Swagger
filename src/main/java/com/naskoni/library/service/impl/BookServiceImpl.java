@@ -1,7 +1,7 @@
 package com.naskoni.library.service.impl;
 
-import com.naskoni.library.dao.BookDao;
-import com.naskoni.library.dao.LendDao;
+import com.naskoni.library.repository.BookRepository;
+import com.naskoni.library.repository.LendRepository;
 import com.naskoni.library.dto.BookRequestDto;
 import com.naskoni.library.dto.BookResponseDto;
 import com.naskoni.library.dto.FileTypesDto;
@@ -13,8 +13,8 @@ import com.naskoni.library.exporter.Exporter;
 import com.naskoni.library.exporter.ExporterFactory;
 import com.naskoni.library.service.BookService;
 import com.naskoni.library.specification.SpecificationsBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -27,32 +27,33 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 
 @Service
+@RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
 
   public static final String BOOK_NOT_FOUND = "Book with id: %d could not be found";
   public static final String BOOK_IN_USE = "Book with id: %d is currently in use";
 
-  @Autowired private BookDao bookDao;
-  @Autowired private LendDao lendDao;
-  @Autowired private ExporterFactory exporterFactory;
+  private final BookRepository bookRepository;
+  private final LendRepository lendRepository;
+  private final ExporterFactory exporterFactory;
 
   @Override
   @Transactional
   public BookResponseDto create(BookRequestDto bookDto) {
     Book book = mapToEntity(bookDto);
-    Book savedBook = bookDao.save(book);
+    Book savedBook = bookRepository.save(book);
     return mapToDto(savedBook);
   }
 
   @Override
   @Transactional
   public BookResponseDto update(Long id, BookRequestDto bookDto) {
-    Optional<Book> optionalBook = bookDao.findById(id);
+    Optional<Book> optionalBook = bookRepository.findById(id);
     if (optionalBook.isPresent()) {
       Book book = optionalBook.get();
       BeanUtils.copyProperties(bookDto, book);
 
-      Book savedBook = bookDao.save(book);
+      Book savedBook = bookRepository.save(book);
       return mapToDto(savedBook);
     } else {
       throw new NotFoundException(String.format(BOOK_NOT_FOUND, id));
@@ -62,23 +63,24 @@ public class BookServiceImpl implements BookService {
   @Override
   @Transactional
   public void delete(Long id) {
-    Optional<Book> optionalBook = bookDao.findById(id);
+    Optional<Book> optionalBook = bookRepository.findById(id);
     if (optionalBook.isPresent()) {
       Book book = optionalBook.get();
-      Optional<Lend> lendOptional = lendDao.findByBook(book);
+      Optional<Lend> lendOptional = lendRepository.findByBook(book);
       if (lendOptional.isPresent()) {
         throw new CurrentlyInUseException(String.format(BOOK_IN_USE, id));
       }
 
-      bookDao.delete(book);
+      bookRepository.delete(book);
     } else {
       throw new NotFoundException(String.format(BOOK_NOT_FOUND, id));
     }
   }
 
   @Override
+  @Transactional(readOnly = true)
   public BookResponseDto findOne(Long id) {
-    Optional<Book> optionalBook = bookDao.findById(id);
+    Optional<Book> optionalBook = bookRepository.findById(id);
     if (optionalBook.isPresent()) {
       return mapToDto(optionalBook.get());
     } else {
@@ -87,6 +89,7 @@ public class BookServiceImpl implements BookService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public Page<BookResponseDto> findAll(String search, Pageable pageable) {
     SpecificationsBuilder<Book> builder = new SpecificationsBuilder<>();
     Matcher matcher = Helper.getMatcher(search);
@@ -95,13 +98,14 @@ public class BookServiceImpl implements BookService {
     }
 
     Specification<Book> spec = builder.build();
-    Page<Book> books = bookDao.findAll(spec, pageable);
+    Page<Book> books = bookRepository.findAll(spec, pageable);
     return books.map(this::mapToDto);
   }
 
   @Override
+  @Transactional(readOnly = true)
   public byte[] export(String type) throws IOException {
-    List<Book> books = bookDao.findAll();
+    List<Book> books = bookRepository.findAll();
     Exporter exporter = exporterFactory.newInstance(type);
 
     return exporter.export(books);

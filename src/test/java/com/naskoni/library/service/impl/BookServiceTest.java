@@ -1,7 +1,7 @@
 package com.naskoni.library.service.impl;
 
-import com.naskoni.library.dao.BookDao;
-import com.naskoni.library.dao.LendDao;
+import com.naskoni.library.repository.BookRepository;
+import com.naskoni.library.repository.LendRepository;
 import com.naskoni.library.dto.BookResponseDto;
 import com.naskoni.library.entity.Book;
 import com.naskoni.library.entity.Lend;
@@ -22,19 +22,19 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-public class BookServiceTest {
+class BookServiceTest {
 
-  @Mock private BookDao bookDao;
-  @Mock private LendDao lendDao;
+  @Mock private BookRepository bookRepository;
+  @Mock private LendRepository lendRepository;
   @Mock private ExporterFactory exporterFactory;
 
   @InjectMocks private BookServiceImpl bookService;
@@ -44,7 +44,7 @@ public class BookServiceTest {
     var bookRequestDto = BooksCreator.getBookRequestDto();
     Book book = bookService.mapToEntity(bookRequestDto);
 
-    when(bookDao.save(book)).thenReturn(book);
+    when(bookRepository.save(book)).thenReturn(book);
     BookResponseDto bookResponseDto = bookService.create(bookRequestDto);
 
     assertEquals(book.getId(), bookResponseDto.getId());
@@ -59,8 +59,8 @@ public class BookServiceTest {
     var bookRequestDto = BooksCreator.getBookRequestDto();
     Book book = bookService.mapToEntity(bookRequestDto);
 
-    when(bookDao.findById(anyLong())).thenReturn(Optional.of(book));
-    when(bookDao.save(book)).thenReturn(book);
+    when(bookRepository.findById(anyLong())).thenReturn(Optional.of(book));
+    when(bookRepository.save(book)).thenReturn(book);
     BookResponseDto bookResponseDto = bookService.update(1L, bookRequestDto);
 
     assertEquals(book.getId(), bookResponseDto.getId());
@@ -79,10 +79,17 @@ public class BookServiceTest {
   @Test
   void deleteExistentBookShouldSuccess() {
     var book = BooksCreator.getBook();
-    when(bookDao.findById(anyLong())).thenReturn(Optional.of(book));
-    when(lendDao.findByBook(book)).thenReturn(Optional.empty());
-    doNothing().when(bookDao).delete(book);
+    when(bookRepository.findById(anyLong())).thenReturn(Optional.of(book));
+    when(lendRepository.findByBook(book)).thenReturn(Optional.empty());
+    doNothing().when(bookRepository).delete(book);
+
     bookService.delete(1L);
+
+    verify(bookRepository).findById(anyLong());
+    verify(bookRepository).delete(book);
+    verify(lendRepository).findByBook(book);
+    verifyNoMoreInteractions(bookRepository);
+    verifyNoMoreInteractions(lendRepository);
   }
 
   @Test
@@ -94,8 +101,8 @@ public class BookServiceTest {
   void deleteBookInUseShouldThrowCurrentlyInUseException() {
     var book = BooksCreator.getBook();
 
-    when(bookDao.findById(anyLong())).thenReturn(Optional.of(book));
-    when(lendDao.findByBook(book)).thenReturn(Optional.of(new Lend()));
+    when(bookRepository.findById(anyLong())).thenReturn(Optional.of(book));
+    when(lendRepository.findByBook(book)).thenReturn(Optional.of(new Lend()));
 
     assertThrows(CurrentlyInUseException.class, () -> bookService.delete(1L));
   }
@@ -104,7 +111,7 @@ public class BookServiceTest {
   void findOneShouldSuccess() {
     var book = BooksCreator.getBook();
 
-    when(bookDao.findById(anyLong())).thenReturn(Optional.of(book));
+    when(bookRepository.findById(anyLong())).thenReturn(Optional.of(book));
     BookResponseDto bookDto = bookService.findOne(1L);
 
     assertEquals(book.getId(), bookDto.getId());
@@ -127,7 +134,7 @@ public class BookServiceTest {
     Pageable pageable = Pageable.unpaged();
     SpecificationsBuilder<Book> builder = new SpecificationsBuilder<>();
     Specification<Book> spec = builder.build();
-    when(bookDao.findAll(spec, pageable)).thenReturn(page);
+    when(bookRepository.findAll(spec, pageable)).thenReturn(page);
     Page<BookResponseDto> bookDtos = bookService.findAll(null, pageable);
     assertEquals(10, bookDtos.getContent().size());
 
@@ -141,13 +148,13 @@ public class BookServiceTest {
   }
 
   @Test
-  public void exportShouldSuccess() throws IOException {
-    when(bookDao.findAll()).thenReturn(BooksCreator.getBooks());
+  void exportShouldSuccess() throws IOException {
+    when(bookRepository.findAll()).thenReturn(BooksCreator.getBooks());
     when(exporterFactory.newInstance("csv")).thenReturn(new CsvFileExporter());
     byte[] export = bookService.export("csv");
     assertNotNull(export);
 
-    String asString = new String(export, "UTF-8");
+    String asString = new String(export, StandardCharsets.UTF_8);
     assertTrue(asString.contains("author,created,id,isbn,name,updated,year"));
     assertTrue(asString.contains("author,,,1645712740,name,,1999"));
   }

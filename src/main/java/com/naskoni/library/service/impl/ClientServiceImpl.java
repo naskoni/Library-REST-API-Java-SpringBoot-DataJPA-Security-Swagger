@@ -1,8 +1,8 @@
 package com.naskoni.library.service.impl;
 
-import com.naskoni.library.dao.ClientDao;
-import com.naskoni.library.dao.LendDao;
-import com.naskoni.library.dao.UserDao;
+import com.naskoni.library.repository.ClientRepository;
+import com.naskoni.library.repository.LendRepository;
+import com.naskoni.library.repository.UserRepository;
 import com.naskoni.library.dto.ClientRequestDto;
 import com.naskoni.library.dto.ClientResponseDto;
 import com.naskoni.library.entity.Client;
@@ -13,8 +13,8 @@ import com.naskoni.library.exception.NotFoundException;
 import com.naskoni.library.security.AuthenticationFacade;
 import com.naskoni.library.service.ClientService;
 import com.naskoni.library.specification.SpecificationsBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,27 +25,26 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 
 @Service
+@RequiredArgsConstructor
 public class ClientServiceImpl implements ClientService {
 
   public static final String CLIENT_NOT_FOUND = "Client with id: %d could not be found";
   public static final String CLIENT_IN_USE = "Client with id: %d is currently in use";
 
-  @Autowired private ClientDao clientDao;
-  @Autowired private LendDao lendDao;
-  @Autowired private UserDao userDao;
-  @Autowired private AuthenticationFacade authenticationFacade;
+  private final ClientRepository clientRepository;
+  private final LendRepository lendRepository;
+  private final UserRepository userRepository;
+  private final AuthenticationFacade authenticationFacade;
 
   @Override
   @Transactional
   public ClientResponseDto create(ClientRequestDto clientDto) {
     Client client = mapToEntity(clientDto);
     String username = authenticationFacade.getAuthentication().getName();
-    Optional<User> userOptional = userDao.findByUsername(username);
-    if (userOptional.isPresent()) {
-      client.setCreatedBy(userOptional.get());
-    }
+    Optional<User> userOptional = userRepository.findByUsername(username);
+    userOptional.ifPresent(client::setCreatedBy);
 
-    Client savedClient = clientDao.save(client);
+    Client savedClient = clientRepository.save(client);
 
     return mapToDto(savedClient);
   }
@@ -53,11 +52,11 @@ public class ClientServiceImpl implements ClientService {
   @Override
   @Transactional
   public ClientResponseDto update(Long id, ClientRequestDto clientDto) {
-    Optional<Client> optionalClient = clientDao.findById(id);
+    Optional<Client> optionalClient = clientRepository.findById(id);
     if (optionalClient.isPresent()) {
       Client client = optionalClient.get();
       BeanUtils.copyProperties(clientDto, client);
-      Client savedClient = clientDao.save(client);
+      Client savedClient = clientRepository.save(client);
       return mapToDto(savedClient);
     } else {
       throw new NotFoundException(String.format(CLIENT_NOT_FOUND, id));
@@ -67,23 +66,24 @@ public class ClientServiceImpl implements ClientService {
   @Override
   @Transactional
   public void delete(Long id) {
-    Optional<Client> optionalClient = clientDao.findById(id);
+    Optional<Client> optionalClient = clientRepository.findById(id);
     if (optionalClient.isPresent()) {
       Client client = optionalClient.get();
-      Optional<Lend> lendOptional = lendDao.findByClient(client);
+      Optional<Lend> lendOptional = lendRepository.findByClient(client);
       if (lendOptional.isPresent()) {
         throw new CurrentlyInUseException(String.format(CLIENT_IN_USE, id));
       }
 
-      clientDao.delete(optionalClient.get());
+      clientRepository.delete(optionalClient.get());
     } else {
       throw new NotFoundException(String.format(CLIENT_NOT_FOUND, id));
     }
   }
 
   @Override
+  @Transactional(readOnly = true)
   public ClientResponseDto findOne(Long id) {
-    Optional<Client> optionalClient = clientDao.findById(id);
+    Optional<Client> optionalClient = clientRepository.findById(id);
     if (optionalClient.isPresent()) {
       return mapToDto(optionalClient.get());
     } else {
@@ -92,6 +92,7 @@ public class ClientServiceImpl implements ClientService {
   }
 
   @Override
+  @Transactional(readOnly = true)
   public Page<ClientResponseDto> findAll(String search, Pageable pageable) {
     SpecificationsBuilder<Client> builder = new SpecificationsBuilder<>();
     Matcher matcher = Helper.getMatcher(search);
@@ -100,7 +101,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     Specification<Client> spec = builder.build();
-    Page<Client> clients = clientDao.findAll(spec, pageable);
+    Page<Client> clients = clientRepository.findAll(spec, pageable);
     return clients.map(this::mapToDto);
   }
 

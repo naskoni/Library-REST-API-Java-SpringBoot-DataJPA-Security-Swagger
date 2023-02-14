@@ -27,7 +27,7 @@ public class SpecificationsBuilder<T extends AbstractEntity> {
 
     List<Specification<T>> specs = new ArrayList<>();
     for (SearchCriteria param : params) {
-      specs.add(new SearchSpecification<T>(param));
+      specs.add(new SearchSpecification<>(param));
     }
 
     Specification<T> result = specs.get(0);

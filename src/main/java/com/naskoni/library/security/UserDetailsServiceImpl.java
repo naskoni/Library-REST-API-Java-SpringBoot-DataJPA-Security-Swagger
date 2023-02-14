@@ -1,10 +1,10 @@
 package com.naskoni.library.security;
 
 import com.google.common.base.Preconditions;
-import com.naskoni.library.dao.UserDao;
+import com.naskoni.library.repository.UserRepository;
 import com.naskoni.library.entity.User;
 import com.naskoni.library.enumeration.Status;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,18 +18,19 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
   public static final String USER_NOT_FOUND = "User with name: %s could not be found";
 
-  @Autowired private UserDao userDao;
+  private final UserRepository userRepository;
 
   @Transactional(readOnly = true)
   @Override
   public UserDetails loadUserByUsername(final String username) {
     Preconditions.checkNotNull(username);
-    Optional<User> userOptional = userDao.findByUsername(username);
-    if (!userOptional.isPresent() || userOptional.get().getStatus() == Status.DEACTIVATED) {
+    Optional<User> userOptional = userRepository.findByUsername(username);
+    if (userOptional.isEmpty() || userOptional.get().getStatus() == Status.DEACTIVATED) {
       throw new UsernameNotFoundException(String.format(USER_NOT_FOUND, username));
     }
 

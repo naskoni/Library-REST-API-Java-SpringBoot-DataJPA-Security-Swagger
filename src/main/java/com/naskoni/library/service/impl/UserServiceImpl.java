@@ -1,7 +1,7 @@
 package com.naskoni.library.service.impl;
 
 import com.google.common.hash.Hashing;
-import com.naskoni.library.dao.UserDao;
+import com.naskoni.library.repository.UserRepository;
 import com.naskoni.library.dto.UserRequestDto;
 import com.naskoni.library.dto.UserResponseDto;
 import com.naskoni.library.entity.User;
@@ -13,8 +13,8 @@ import com.naskoni.library.exception.UserDeactivatedException;
 import com.naskoni.library.security.AuthenticationFacade;
 import com.naskoni.library.service.UserService;
 import com.naskoni.library.specification.SpecificationsBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
   public static final String USER_NOT_FOUND = "User with id: %d could not be found";
@@ -34,13 +35,13 @@ public class UserServiceImpl implements UserService {
       "User with id: %d is logged and cannot deactivate himself.";
   public static final String USERNAME_EXIST = "username: %s already exists";
 
-  @Autowired private UserDao userDao;
-  @Autowired private AuthenticationFacade authenticationFacade;
+  private final UserRepository userRepository;
+  private final AuthenticationFacade authenticationFacade;
 
   @Transactional
   @Override
   public UserResponseDto create(UserRequestDto userRequestDto) {
-    Optional<User> optionalUser = userDao.findByUsername(userRequestDto.getUsername());
+    Optional<User> optionalUser = userRepository.findByUsername(userRequestDto.getUsername());
     if (optionalUser.isPresent()) {
       throw new DuplicateException(String.format(USERNAME_EXIST, userRequestDto.getUsername()));
     }
@@ -52,18 +53,18 @@ public class UserServiceImpl implements UserService {
 
     User user = mapToEntity(userRequestDto);
     user.setStatus(Status.ACTIVE);
-    User savedUser = userDao.save(user);
+    User savedUser = userRepository.save(user);
     return mapToDto(savedUser);
   }
 
   @Transactional
   @Override
   public UserResponseDto update(Long id, UserRequestDto userRequestDto) {
-    Optional<User> optionalUser = userDao.findById(id);
+    Optional<User> optionalUser = userRepository.findById(id);
     if (optionalUser.isPresent()) {
       User user = optionalUser.get();
-      Optional<User> optionalbyUsername = userDao.findByUsername(userRequestDto.getUsername());
-      if (optionalbyUsername.isPresent() && optionalbyUsername.get().getId() != id) {
+      Optional<User> optionalbyUsername = userRepository.findByUsername(userRequestDto.getUsername());
+      if (optionalbyUsername.isPresent() && !optionalbyUsername.get().getId().equals(id)) {
         throw new DuplicateException(String.format(USERNAME_EXIST, userRequestDto.getUsername()));
       }
 
@@ -74,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
       BeanUtils.copyProperties(userRequestDto, user);
 
-      User savedUser = userDao.save(user);
+      User savedUser = userRepository.save(user);
       return mapToDto(savedUser);
     } else {
       throw new NotFoundException(String.format(USER_NOT_FOUND, id));
@@ -84,7 +85,7 @@ public class UserServiceImpl implements UserService {
   @Transactional
   @Override
   public UserResponseDto deactivate(Long id) {
-    Optional<User> userOptional = userDao.findById(id);
+    Optional<User> userOptional = userRepository.findById(id);
     if (userOptional.isPresent()) {
       User user = userOptional.get();
       if (user.getStatus() == Status.DEACTIVATED) {
@@ -97,16 +98,17 @@ public class UserServiceImpl implements UserService {
       }
 
       user.setStatus(Status.DEACTIVATED);
-      User savedUser = userDao.save(user);
+      User savedUser = userRepository.save(user);
       return mapToDto(savedUser);
     } else {
       throw new NotFoundException(String.format(USER_NOT_FOUND, id));
     }
   }
 
+  @Transactional(readOnly = true)
   @Override
   public UserResponseDto findOne(Long id) {
-    Optional<User> optionalUser = userDao.findById(id);
+    Optional<User> optionalUser = userRepository.findById(id);
     if (optionalUser.isPresent()) {
       return mapToDto(optionalUser.get());
     } else {
@@ -114,7 +116,7 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   @Override
   public Page<UserResponseDto> findAll(String search, Pageable pageable) {
     SpecificationsBuilder<User> builder = new SpecificationsBuilder<>();
@@ -124,7 +126,7 @@ public class UserServiceImpl implements UserService {
     }
 
     Specification<User> spec = builder.build();
-    Page<User> users = userDao.findAll(spec, pageable);
+    Page<User> users = userRepository.findAll(spec, pageable);
     return users.map(this::mapToDto);
   }
 
