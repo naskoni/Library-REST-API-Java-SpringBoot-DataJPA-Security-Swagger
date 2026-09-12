@@ -1,45 +1,54 @@
 package com.naskoni.library.service.impl;
 
-import com.naskoni.library.repository.ClientRepository;
-import com.naskoni.library.repository.LendRepository;
-import com.naskoni.library.repository.UserRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 import com.naskoni.library.dto.ClientResponseDto;
 import com.naskoni.library.entity.Client;
 import com.naskoni.library.entity.Lend;
 import com.naskoni.library.exception.CurrentlyInUseException;
 import com.naskoni.library.exception.NotFoundException;
+import com.naskoni.library.repository.ClientRepository;
+import com.naskoni.library.repository.LendRepository;
+import com.naskoni.library.repository.UserRepository;
 import com.naskoni.library.security.AuthenticationFacade;
 import com.naskoni.library.specification.SpecificationsBuilder;
 import com.naskoni.library.util.ClientsCreator;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class ClientServiceTest {
 
-  @Mock private ClientRepository clientRepository;
-  @Mock private LendRepository lendRepository;
-  @Mock private UserRepository userRepository;
-  @Mock private AuthenticationFacade authenticationFacade;
+  @Mock
+  private ClientRepository clientRepository;
 
-  @InjectMocks private ClientServiceImpl clientService;
+  @Mock
+  private LendRepository lendRepository;
+
+  @Mock
+  private UserRepository userRepository;
+
+  @Mock
+  private AuthenticationFacade authenticationFacade;
+
+  @InjectMocks
+  private ClientServiceImpl clientService;
 
   @Test
   void createShouldSuccess() {
@@ -78,15 +87,16 @@ class ClientServiceTest {
   @Test
   void updateNonExistentClientShouldThrowNotFoundException() {
     var clientRequestDto = ClientsCreator.getClientRequestDto();
+
     assertThrows(NotFoundException.class, () -> clientService.update(1L, clientRequestDto));
   }
 
   @Test
   void deleteExistentClientShouldSuccess() {
     var client = ClientsCreator.getClient();
+
     when(clientRepository.findById(anyLong())).thenReturn(Optional.of(client));
     when(lendRepository.findByClient(client)).thenReturn(Optional.empty());
-    doNothing().when(clientRepository).delete(client);
 
     clientService.delete(1L);
 
@@ -138,7 +148,9 @@ class ClientServiceTest {
     Pageable pageable = Pageable.unpaged();
     SpecificationsBuilder<Client> builder = new SpecificationsBuilder<>();
     Specification<Client> spec = builder.build();
-    Mockito.when(clientRepository.findAll(spec, pageable)).thenReturn(page);
+
+    when(clientRepository.findAll(spec, pageable)).thenReturn(page);
+
     Page<ClientResponseDto> clientDtos = clientService.findAll(null, pageable);
 
     assertEquals(10, clientDtos.getContent().size());

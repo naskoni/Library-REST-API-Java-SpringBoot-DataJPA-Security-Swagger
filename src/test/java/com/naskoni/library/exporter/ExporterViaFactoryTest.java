@@ -1,22 +1,24 @@
 package com.naskoni.library.exporter;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.naskoni.library.entity.Book;
 import com.naskoni.library.exception.NotFoundException;
 import com.naskoni.library.util.BooksCreator;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 class ExporterViaFactoryTest {
 
-  @Autowired private ExporterFactory exporterFactory;
+  @Autowired
+  private ExporterFactory exporterFactory;
 
   @Test
   void exportCsvFileShouldSuccess() throws IOException {

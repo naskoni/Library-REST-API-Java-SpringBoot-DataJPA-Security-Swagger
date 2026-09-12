@@ -1,43 +1,47 @@
 package com.naskoni.library.service.impl;
 
-import com.naskoni.library.repository.BookRepository;
-import com.naskoni.library.repository.ClientRepository;
-import com.naskoni.library.repository.LendRepository;
-import com.naskoni.library.dto.LendResponseDto;
-import com.naskoni.library.entity.Lend;
-import com.naskoni.library.exception.NotFoundException;
-import com.naskoni.library.specification.SpecificationsBuilder;
-import com.naskoni.library.util.BooksCreator;
-import com.naskoni.library.util.ClientsCreator;
-import com.naskoni.library.util.LendsCreator;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
+import com.naskoni.library.dto.LendResponseDto;
+import com.naskoni.library.entity.Lend;
+import com.naskoni.library.exception.NotFoundException;
+import com.naskoni.library.repository.BookRepository;
+import com.naskoni.library.repository.ClientRepository;
+import com.naskoni.library.repository.LendRepository;
+import com.naskoni.library.specification.SpecificationsBuilder;
+import com.naskoni.library.util.BooksCreator;
+import com.naskoni.library.util.ClientsCreator;
+import com.naskoni.library.util.LendsCreator;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+
+@ExtendWith(MockitoExtension.class)
 class LendServiceTest {
 
-  @Mock private LendRepository lendRepository;
-  @Mock private BookRepository bookRepository;
-  @Mock private ClientRepository clientRepository;
+  @Mock
+  private LendRepository lendRepository;
 
-  @InjectMocks private LendServiceImpl lendService;
+  @Mock
+  private BookRepository bookRepository;
+
+  @Mock
+  private ClientRepository clientRepository;
+
+  @InjectMocks
+  private LendServiceImpl lendService;
 
   @Test
   void createShouldSuccess() {
@@ -79,6 +83,7 @@ class LendServiceTest {
   @Test
   void updateNonExistentLendShouldThrowNotFoundException() {
     var lendRequestDto = LendsCreator.getLendRequestDto();
+
     assertThrows(NotFoundException.class, () -> lendService.update(1L, lendRequestDto));
   }
 
@@ -111,8 +116,10 @@ class LendServiceTest {
     Pageable pageable = Pageable.unpaged();
     SpecificationsBuilder<Lend> builder = new SpecificationsBuilder<>();
     Specification<Lend> spec = builder.build();
-    Mockito.when(lendRepository.findAll(spec, pageable)).thenReturn(page);
+    when(lendRepository.findAll(spec, pageable)).thenReturn(page);
+
     Page<LendResponseDto> lendResponseDtos = lendService.findAll(null, pageable);
+
     assertEquals(1, lendResponseDtos.getContent().size());
 
     LendResponseDto lendResponseDto = lendResponseDtos.iterator().next();

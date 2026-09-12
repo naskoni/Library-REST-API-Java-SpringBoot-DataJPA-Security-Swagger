@@ -1,15 +1,14 @@
 package com.naskoni.library.exporter;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.naskoni.library.entity.Book;
 import com.naskoni.library.util.BooksCreator;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 class CsvFileExporterTest {
 
