@@ -1,7 +1,6 @@
 package com.naskoni.library.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import java.sql.Date;
+import java.time.LocalDate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,9 +12,7 @@ public class LendResponseDto extends AbstractResponseDto {
 
   private ClientResponseDto client;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-  private Date lendingDate;
+  private LocalDate lendingDate;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-  private Date returnDate;
+  private LocalDate returnDate;
 }

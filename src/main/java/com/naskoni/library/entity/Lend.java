@@ -5,7 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.sql.Date;
+import java.time.LocalDate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -24,8 +24,8 @@ public class Lend extends AbstractEntity {
   private Client client;
 
   @Column(name = "lending_date")
-  private Date lendingDate;
+  private LocalDate lendingDate;
 
   @Column(name = "return_date")
-  private Date returnDate;
+  private LocalDate returnDate;
 }

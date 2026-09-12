@@ -1,7 +1,6 @@
 package com.naskoni.library.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import java.sql.Date;
+import java.time.LocalDate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -13,8 +12,7 @@ public class ClientResponseDto extends AbstractResponseDto {
 
   private String pid;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-  private Date birthdate;
+  private LocalDate birthdate;
 
   private String createdBy;
 }

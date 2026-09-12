@@ -3,8 +3,7 @@ package com.naskoni.library.util;
 import com.naskoni.library.dto.LendRequestDto;
 import com.naskoni.library.dto.LendResponseDto;
 import com.naskoni.library.entity.Lend;
-
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,8 +14,8 @@ public class LendsCreator {
     lend.setId(1L);
     lend.setClient(ClientsCreator.getClient());
     lend.setBook(BooksCreator.getBook());
-    lend.setLendingDate(new Date(System.currentTimeMillis()));
-    lend.setReturnDate(new Date(System.currentTimeMillis()));
+    lend.setLendingDate(LocalDate.now());
+    lend.setReturnDate(LocalDate.now());
     return lend;
   }
 
@@ -24,8 +23,8 @@ public class LendsCreator {
     var lend = new LendRequestDto();
     lend.setBookId(1L);
     lend.setClientId(1L);
-    lend.setLendingDate(Date.valueOf("2020-01-01"));
-    lend.setReturnDate(Date.valueOf("2020-01-02"));
+    lend.setLendingDate(LocalDate.now());
+    lend.setReturnDate(LocalDate.now());
     return lend;
   }
 
@@ -34,8 +33,8 @@ public class LendsCreator {
     lend.setId(1L);
     lend.setBook(BooksCreator.getBookResponseDto());
     lend.setClient(ClientsCreator.getClientResponseDto());
-    lend.setLendingDate(Date.valueOf("2020-01-01"));
-    lend.setReturnDate(Date.valueOf("2020-01-02"));
+    lend.setLendingDate(LocalDate.now());
+    lend.setReturnDate(LocalDate.now());
     return lend;
   }
 

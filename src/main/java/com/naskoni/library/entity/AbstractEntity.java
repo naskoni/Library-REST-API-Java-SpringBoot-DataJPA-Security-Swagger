@@ -5,9 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import java.util.Date;
+import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -24,13 +22,11 @@ public abstract class AbstractEntity {
 
   @Setter(AccessLevel.PRIVATE)
   @CreationTimestamp
-  @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "created", columnDefinition = "timestamp(3)", nullable = false, updatable = false)
-  private Date created;
+  private Instant created;
 
   @Setter(AccessLevel.PRIVATE)
   @UpdateTimestamp
-  @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "updated", columnDefinition = "timestamp(3)", nullable = false)
-  private Date updated;
+  private Instant updated;
 }
