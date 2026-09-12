@@ -1,9 +1,9 @@
 package com.naskoni.library.controller;
 
+import static com.naskoni.library.util.GsonTestUtil.createGson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doThrow;
@@ -19,7 +19,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.naskoni.library.dto.LendRequestDto;
 import com.naskoni.library.exception.NotFoundException;
 import com.naskoni.library.service.LendService;
@@ -62,7 +61,7 @@ class LendControllerTest {
           "updated": null,
           "name": "Max Max",
           "pid": "1645712740",
-          "birthdate": "2019-12-31",
+          "birthdate": "2006-09-12",
           "createdBy": "admin"
         },
         "lendingDate": "2019-12-31",
@@ -70,8 +69,7 @@ class LendControllerTest {
       }
       """;
 
-  private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
-
+  private final Gson gson = createGson();
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   private MockMvc mockMvc;
@@ -85,20 +83,25 @@ class LendControllerTest {
 
     LendController lendController = new LendController(lendService);
 
-    this.mockMvc = MockMvcBuilders.standaloneSetup(lendController)
-        .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver()).setControllerAdvice(new ErrorHandler())
+    mockMvc = MockMvcBuilders.standaloneSetup(lendController)
+        .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+        .setControllerAdvice(new ErrorHandler())
         .build();
   }
 
   @Test
   void createWithValidDtoShouldReturnHttpCreated() throws Exception {
-
     String json = gson.toJson(LendsCreator.getLendRequestDto());
 
     when(lendService.create(any())).thenReturn(LendsCreator.getLendResponseDto());
 
-    MvcResult mvcResult = mockMvc.perform(post(LENDS_URI).content(json).contentType(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON)).andExpect(status().isCreated()).andReturn();
+    MvcResult mvcResult = mockMvc.perform(
+            post(LENDS_URI)
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated())
+        .andReturn();
 
     String content = mvcResult.getResponse().getContentAsString();
 
@@ -111,12 +114,18 @@ class LendControllerTest {
 
   @Test
   void createWithInvalidDtoShouldFailHttpBadRequest() throws Exception {
-
     String json = gson.toJson(new LendRequestDto());
 
-    mockMvc.perform(post(LENDS_URI).content(json).contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest())
-        .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()));
+    mockMvc.perform(
+            post(LENDS_URI)
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest())
+        .andExpect(result ->
+            assertInstanceOf(
+                MethodArgumentNotValidException.class,
+                result.getResolvedException()));
 
     verify(lendService, times(0)).create(any());
     verifyNoMoreInteractions(lendService);
@@ -124,13 +133,17 @@ class LendControllerTest {
 
   @Test
   void updateWithValidDtoShouldReturnHttpOk() throws Exception {
-
     String json = gson.toJson(LendsCreator.getLendRequestDto());
 
-    when(lendService.update(anyLong(), any())).thenReturn(LendsCreator.getLendResponseDto());
+    when(lendService.update(anyLong(), any()))
+        .thenReturn(LendsCreator.getLendResponseDto());
 
-    MvcResult mvcResult = mockMvc.perform(put(LENDS_URI_WITH_PARAM).content(json)
-            .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+    MvcResult mvcResult = mockMvc.perform(
+            put(LENDS_URI_WITH_PARAM)
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
         .andReturn();
 
     String content = mvcResult.getResponse().getContentAsString();
@@ -144,12 +157,18 @@ class LendControllerTest {
 
   @Test
   void updateWithInvalidDtoShouldFailHttpBadRequest() throws Exception {
-
     String json = gson.toJson(new LendRequestDto());
 
-    mockMvc.perform(put(LENDS_URI_WITH_PARAM).content(json).contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest())
-        .andExpect(result -> assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()));
+    mockMvc.perform(
+            put(LENDS_URI_WITH_PARAM)
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest())
+        .andExpect(result ->
+            assertInstanceOf(
+                MethodArgumentNotValidException.class,
+                result.getResolvedException()));
 
     verify(lendService, times(0)).update(anyLong(), any());
     verifyNoMoreInteractions(lendService);
@@ -157,14 +176,22 @@ class LendControllerTest {
 
   @Test
   void updateNonExistentLendShouldFailHttpNotFound() throws Exception {
-
     String json = gson.toJson(LendsCreator.getLendRequestDto());
 
-    doThrow(new NotFoundException("")).when(lendService).update(anyLong(), any());
+    doThrow(new NotFoundException(""))
+        .when(lendService)
+        .update(anyLong(), any());
 
-    mockMvc.perform(put(LENDS_URI_WITH_PARAM).content(json).contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound())
-        .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()));
+    mockMvc.perform(
+            put(LENDS_URI_WITH_PARAM)
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isNotFound())
+        .andExpect(result ->
+            assertInstanceOf(
+                NotFoundException.class,
+                result.getResolvedException()));
 
     verify(lendService).update(anyLong(), any());
     verifyNoMoreInteractions(lendService);
@@ -172,11 +199,14 @@ class LendControllerTest {
 
   @Test
   void findOneShouldReturnHttpOk() throws Exception {
+    when(lendService.findOne(anyLong()))
+        .thenReturn(LendsCreator.getLendResponseDto());
 
-    when(lendService.findOne(anyLong())).thenReturn(LendsCreator.getLendResponseDto());
-
-    MvcResult mvcResult = mockMvc.perform(get(LENDS_URI_WITH_PARAM).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk()).andReturn();
+    MvcResult mvcResult = mockMvc.perform(
+            get(LENDS_URI_WITH_PARAM)
+                .accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andReturn();
 
     String content = mvcResult.getResponse().getContentAsString();
 
@@ -189,13 +219,18 @@ class LendControllerTest {
 
   @Test
   void findAllShouldReturnHttpOk() throws Exception {
-
     var lends = LendsCreator.getLendResponseDtos();
 
-    when(lendService.findAll(any(), any())).thenReturn(new PageImpl<>(lends, PageRequest.of(0, 10), lends.size()));
+    when(lendService.findAll(any(), any()))
+        .thenReturn(
+            new PageImpl<>(
+                lends,
+                PageRequest.of(0, 10),
+                lends.size()));
 
-    MvcResult mvcResult = mockMvc.perform(get(LENDS_URI)
-            .accept(MediaType.APPLICATION_JSON))
+    MvcResult mvcResult = mockMvc.perform(
+            get(LENDS_URI)
+                .accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
 
@@ -204,21 +239,21 @@ class LendControllerTest {
     assertNotNull(content);
 
     JsonNode json = objectMapper.readTree(content);
+    JsonNode contentNode = json.get("content");
 
-    assertTrue(content.contains("\"id\":1"));
-    assertTrue(content.contains("\"name\":\"Don Quixote\""));
-    assertTrue(content.contains("\"name\":\"Max Max\""));
-    assertTrue(content.contains("\"lendingDate\":\"2019-12-31\""));
-    assertTrue(content.contains("\"returnDate\":\"2020-01-01\""));
+    assertEquals(lends.size(), contentNode.size());
+    assertEquals(1, contentNode.get(0).get("id").asInt());
+    assertEquals("Don Quixote", contentNode.get(0).get("book").get("name").asText());
+    assertEquals("Max Max", contentNode.get(0).get("client").get("name").asText());
+    assertEquals("2006-09-12", contentNode.get(0).get("client").get("birthdate").asText());
+    assertEquals("admin", contentNode.get(0).get("client").get("createdBy").asText());
+    assertEquals("2019-12-31", contentNode.get(0).get("lendingDate").asText());
+    assertEquals("2020-01-01", contentNode.get(0).get("returnDate").asText());
 
     assertEquals(10, json.get("size").asInt());
-
     assertEquals(0, json.get("number").asInt());
-
     assertEquals(lends.size(), json.get("totalElements").asInt());
-
     assertEquals((lends.size() + 9) / 10, json.get("totalPages").asInt());
-
     assertEquals(lends.size(), json.get("numberOfElements").asInt());
 
     verify(lendService).findAll(any(), any());
@@ -226,7 +261,8 @@ class LendControllerTest {
   }
 
   private void assertJsonEquals(String expected, String actual) throws Exception {
-
-    assertEquals(objectMapper.readTree(expected), objectMapper.readTree(actual));
+    assertEquals(
+        objectMapper.readTree(expected),
+        objectMapper.readTree(actual));
   }
 }

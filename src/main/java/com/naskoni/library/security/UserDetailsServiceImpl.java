@@ -1,12 +1,9 @@
 package com.naskoni.library.security;
 
 import com.google.common.base.Preconditions;
-import com.naskoni.library.entity.User;
 import com.naskoni.library.enumeration.Status;
 import com.naskoni.library.repository.UserRepository;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -28,15 +25,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
   @Override
   public UserDetails loadUserByUsername(final String username) {
     Preconditions.checkNotNull(username);
-    Optional<User> userOptional = userRepository.findByUsername(username);
-    if (userOptional.isEmpty() || userOptional.get().getStatus() == Status.DEACTIVATED) {
-      throw new UsernameNotFoundException(String.format(USER_NOT_FOUND, username));
-    }
 
-    User user = userOptional.get();
-    List<GrantedAuthority> authorities = new ArrayList<>();
-    authorities.add(new SimpleGrantedAuthority(user.getRole().toString()));
+    var user = userRepository.findByUsername(username)
+        .filter(foundUser -> foundUser.getStatus() != Status.DEACTIVATED)
+        .orElseThrow(() ->
+            new UsernameNotFoundException(USER_NOT_FOUND.formatted(username)));
 
-    return new UserDetailsImpl(user.getUsername(), user.getPassword(), authorities);
+    List<GrantedAuthority> authorities =
+        List.of(new SimpleGrantedAuthority(user.getRole().toString()));
+
+    return new UserDetailsImpl(
+        user.getUsername(),
+        user.getPassword(),
+        authorities);
   }
 }

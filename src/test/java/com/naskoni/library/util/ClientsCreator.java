@@ -4,8 +4,7 @@ import com.naskoni.library.dto.ClientRequestDto;
 import com.naskoni.library.dto.ClientResponseDto;
 import com.naskoni.library.entity.Client;
 import com.naskoni.library.entity.User;
-
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +13,7 @@ public class ClientsCreator {
   public static ClientRequestDto getClientRequestDto() {
     var client = new ClientRequestDto();
     client.setName("name");
-    client.setBirthdate(Date.valueOf("2020-01-01"));
+    client.setBirthdate(LocalDate.of(2006, 9, 12));
     client.setPid("1645712740");
     return client;
   }
@@ -23,7 +22,7 @@ public class ClientsCreator {
     var client = new ClientResponseDto();
     client.setId(1L);
     client.setName("Max Max");
-    client.setBirthdate(Date.valueOf("2020-01-01"));
+    client.setBirthdate(LocalDate.of(2006, 9, 12));
     client.setPid("1645712740");
     client.setCreatedBy("admin");
     return client;
@@ -42,8 +41,8 @@ public class ClientsCreator {
     var client = new Client();
     client.setId(1L);
     client.setName("name");
-    client.setBirthdate(new Date(System.currentTimeMillis()));
-    client.setPid("164571274");
+    client.setBirthdate(LocalDate.of(2006, 9, 12));
+    client.setPid("1645712740");
     client.setCreatedBy(new User());
     return client;
   }

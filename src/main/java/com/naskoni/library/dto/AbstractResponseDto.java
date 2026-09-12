@@ -1,7 +1,6 @@
 package com.naskoni.library.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import java.util.Date;
+import java.time.Instant;
 import lombok.Data;
 
 @Data
@@ -9,9 +8,7 @@ public abstract class AbstractResponseDto {
 
   private Long id;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-  private Date created;
+  private Instant created;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-  private Date updated;
+  private Instant updated;
 }

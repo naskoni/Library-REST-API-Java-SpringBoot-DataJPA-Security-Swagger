@@ -4,7 +4,6 @@ import com.naskoni.library.dto.BookRequestDto;
 import com.naskoni.library.dto.BookResponseDto;
 import com.naskoni.library.dto.FileTypesDto;
 import com.naskoni.library.entity.Book;
-import com.naskoni.library.entity.Lend;
 import com.naskoni.library.exception.CurrentlyInUseException;
 import com.naskoni.library.exception.NotFoundException;
 import com.naskoni.library.exporter.Exporter;
@@ -15,7 +14,6 @@ import com.naskoni.library.service.BookService;
 import com.naskoni.library.specification.SpecificationsBuilder;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -39,52 +37,44 @@ public class BookServiceImpl implements BookService {
   @Override
   @Transactional
   public BookResponseDto create(BookRequestDto bookDto) {
-    Book book = mapToEntity(bookDto);
-    Book savedBook = bookRepository.save(book);
+    var book = mapToEntity(bookDto);
+    var savedBook = bookRepository.save(book);
     return mapToDto(savedBook);
   }
 
   @Override
   @Transactional
   public BookResponseDto update(Long id, BookRequestDto bookDto) {
-    Optional<Book> optionalBook = bookRepository.findById(id);
-    if (optionalBook.isPresent()) {
-      Book book = optionalBook.get();
-      BeanUtils.copyProperties(bookDto, book);
+    var book = bookRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(BOOK_NOT_FOUND.formatted(id)));
 
-      Book savedBook = bookRepository.save(book);
-      return mapToDto(savedBook);
-    } else {
-      throw new NotFoundException(String.format(BOOK_NOT_FOUND, id));
-    }
+    BeanUtils.copyProperties(bookDto, book);
+
+    var savedBook = bookRepository.save(book);
+    return mapToDto(savedBook);
   }
 
   @Override
   @Transactional
   public void delete(Long id) {
-    Optional<Book> optionalBook = bookRepository.findById(id);
-    if (optionalBook.isPresent()) {
-      Book book = optionalBook.get();
-      Optional<Lend> lendOptional = lendRepository.findByBook(book);
-      if (lendOptional.isPresent()) {
-        throw new CurrentlyInUseException(String.format(BOOK_IN_USE, id));
-      }
+    var book = bookRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(BOOK_NOT_FOUND.formatted(id)));
 
-      bookRepository.delete(book);
-    } else {
-      throw new NotFoundException(String.format(BOOK_NOT_FOUND, id));
+    var lend = lendRepository.findByBook(book);
+    if (lend.isPresent()) {
+      throw new CurrentlyInUseException(BOOK_IN_USE.formatted(id));
     }
+
+    bookRepository.delete(book);
   }
 
   @Override
   @Transactional(readOnly = true)
   public BookResponseDto findOne(Long id) {
-    Optional<Book> optionalBook = bookRepository.findById(id);
-    if (optionalBook.isPresent()) {
-      return mapToDto(optionalBook.get());
-    } else {
-      throw new NotFoundException(String.format(BOOK_NOT_FOUND, id));
-    }
+    var book = bookRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(BOOK_NOT_FOUND.formatted(id)));
+
+    return mapToDto(book);
   }
 
   @Override
@@ -92,12 +82,14 @@ public class BookServiceImpl implements BookService {
   public Page<BookResponseDto> findAll(String search, Pageable pageable) {
     SpecificationsBuilder<Book> builder = new SpecificationsBuilder<>();
     Matcher matcher = Helper.getMatcher(search);
+
     while (matcher.find()) {
       builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
     }
 
     Specification<Book> spec = builder.build();
     Page<Book> books = bookRepository.findAll(spec, pageable);
+
     return books.map(this::mapToDto);
   }
 

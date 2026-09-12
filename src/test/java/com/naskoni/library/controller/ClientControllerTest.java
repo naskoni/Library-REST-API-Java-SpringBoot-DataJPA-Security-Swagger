@@ -1,5 +1,6 @@
 package com.naskoni.library.controller;
 
+import static com.naskoni.library.util.GsonTestUtil.createGson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,7 +22,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.naskoni.library.dto.ClientRequestDto;
 import com.naskoni.library.exception.CurrentlyInUseException;
 import com.naskoni.library.exception.NotFoundException;
@@ -52,15 +52,12 @@ class ClientControllerTest {
         "updated": null,
         "name": "Max Max",
         "pid": "1645712740",
-        "birthdate": "2019-12-31",
+        "birthdate": "2006-09-12",
         "createdBy": "admin"
       }
       """;
 
-  private final Gson gson =
-      new GsonBuilder()
-          .setDateFormat("yyyy-MM-dd")
-          .create();
+  private final Gson gson = createGson();
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -311,7 +308,7 @@ class ClientControllerTest {
     assertTrue(content.contains("\"id\":1"));
     assertTrue(content.contains("\"name\":\"Max Max\""));
     assertTrue(content.contains("\"pid\":\"1645712740\""));
-    assertTrue(content.contains("\"birthdate\":\"2019-12-31\""));
+    assertTrue(content.contains("\"birthdate\":\"2006-09-12\""));
     assertTrue(content.contains("\"createdBy\":\"admin\""));
 
     JsonNode json = objectMapper.readTree(content);
