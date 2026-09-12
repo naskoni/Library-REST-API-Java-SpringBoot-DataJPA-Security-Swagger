@@ -1,8 +1,5 @@
 package com.naskoni.library.service.impl;
 
-import com.naskoni.library.repository.ClientRepository;
-import com.naskoni.library.repository.LendRepository;
-import com.naskoni.library.repository.UserRepository;
 import com.naskoni.library.dto.ClientRequestDto;
 import com.naskoni.library.dto.ClientResponseDto;
 import com.naskoni.library.entity.Client;
@@ -10,9 +7,14 @@ import com.naskoni.library.entity.Lend;
 import com.naskoni.library.entity.User;
 import com.naskoni.library.exception.CurrentlyInUseException;
 import com.naskoni.library.exception.NotFoundException;
+import com.naskoni.library.repository.ClientRepository;
+import com.naskoni.library.repository.LendRepository;
+import com.naskoni.library.repository.UserRepository;
 import com.naskoni.library.security.AuthenticationFacade;
 import com.naskoni.library.service.ClientService;
 import com.naskoni.library.specification.SpecificationsBuilder;
+import java.util.Optional;
+import java.util.regex.Matcher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -20,9 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
-import java.util.regex.Matcher;
 
 @Service
 @RequiredArgsConstructor

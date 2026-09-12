@@ -1,10 +1,9 @@
 package com.naskoni.library.dto;
 
 import com.naskoni.library.enumeration.Role;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 
 @Data
 public class UserRequestDto {

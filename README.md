@@ -1,64 +1,125 @@
-# Library REST 2023
+# Library REST API
 
-### The project from 2016 refactored as a REST API and updated to the following versions of:
-  - Java 19,
-  - Spring Boot 2.5.14,
-  - Spring Security 5.5.8,
-  - Spring MVC 5.3.2,
-  - Spring Data JPA 2.5.14,
-  - SpringFox Swagger 2.9.2,
-  - JUnit 5.7.2,
-  - Gradle 8.0
-  
-### Prerequisites
-    - Java 19 JRE or JDK installed
-    - MySQL installed with created schema 'library' or PostgreSQL, if not - the application can be started
-     with built-in H2 in-memory DB. You can use any DB you want, but the corresponding dependency must be
-     added to 'build.gradle'.
-        
-### Environment variables
+A REST API for library management, originally created in 2016 and later refactored and modernized with current Java and Spring
+technologies.
 
-By default, the H2 in-memory DB will be used.
-The application rely on environment variables in order to run with DB of your choice.
-These need to be set up in your environment or in the Run Configuration of your IDE:
+## Technology Stack
 
-    - LIBRARY.DB.URL (default is 'sa')
-    - LIBRARY.DB.USERNAME (default is 'sa')
-    - LIBRARY.DB.PASSWORD - examples: H2: 'jdbc:h2:mem:test' (default),
-                                 MySQL: 'jdbc:mysql://localhost/library',
-                                 PostgreSQL: 'jdbc:postgresql://localhost:5432/postgres'
-    - LIBRARY.DDL (default is 'create')
-  
-### Application can be expanded without recompiling
+* Java 26
+* Spring Boot 4.1.1
+* Spring Framework 7
+* Spring Security 7
+* Spring Data JPA
+* Gradle 9.7.1
+* JUnit 5
+* Springdoc OpenAPI
+* Hibernate
+* H2 / MySQL / PostgreSQL
+* Lombok
 
-The application ability to export data as a file can be expanded. Any implementation of Exporter interface 
-(see package 'exporter') can be placed as a compiled class in the 'pluginClasses' directory, whose location
-is defined in application.properties and will be loaded via classloader when the application is started.
-For the moment 'pluginClasses' contains XmlFileExporter.class.
+## Prerequisites
 
-### Swagger UI
+* Java 26 JDK
+* Gradle Wrapper is included, so a separate Gradle installation is not required
 
-When running locally the Swagger UI is available on http://localhost:8080/library/api/swagger-ui.html
+The application uses an H2 in-memory database by default, but can also be configured to use MySQL or PostgreSQL.
 
-### Security
+## Pluggable Exporters
 
-    When starting the application, the database table 'users' will be populated with 2 records -> 
-    see 'data.sql' in 'resources' directory.
-    All endpoints are secured. Access is granted with Basic Authentication to: 
-    - user: admin, password: admin (ROLE_ADMIN)
-    - user: user, password: user (ROLE_USER)
+The application supports extending the export functionality without recompiling the main application.
 
-    Users with ROLE_ADMIN can use all endpoints. Users with ROLE_USER cannot access '/users' endpoint, 
-    delete and export operations. 
-    
-### ETags
+Any implementation of the `Exporter` interface can be compiled and placed in the `pluginClasses` directory.
 
-    The API supports shallow ETags on GET requests. The value of response ETag header can be set to 
-    request header 'If-None-Match' value. If the requested resource is not modified the response status
-    will be: 304 Not Modified and no response body will be present.
-  
+The directory is configured through `application.properties`:
 
-  
-  
-  
- 
+```properties
+dir.classes=pluginClasses
+```
+
+The application discovers and loads exporter implementations dynamically when it starts.
+
+The project currently supports two types of exporters:
+
+- CSV exporter — included in the application code and loaded directly by the application.
+- XML exporter — implemented as a plugin and loaded dynamically from the pluginClasses directory at application startup.
+
+## Database Configuration
+
+The application uses the following environment variables:
+
+* `LIBRARY.DB.URL` — database JDBC URL
+  Default: `jdbc:h2:mem:test`
+* `LIBRARY.DB.USERNAME` — database username
+  Default: `sa`
+* `LIBRARY.DB.PASSWORD` — database password
+  Default: `sa`
+* `LIBRARY.DDL` — Hibernate schema generation strategy
+  Default: `create`
+
+Examples:
+
+```text
+H2:
+jdbc:h2:mem:test
+
+MySQL:
+jdbc:mysql://localhost/library
+
+PostgreSQL:
+jdbc:postgresql://localhost:5432/postgres
+```
+
+## Swagger / OpenAPI
+
+When running locally, the Swagger UI is available at:
+
+`http://localhost:8080/library/api/swagger-ui/index.html`
+
+The OpenAPI specification is available at:
+
+`http://localhost:8080/library/api/v3/api-docs`
+
+The OpenAPI specification is generated using Springdoc OpenAPI.
+
+## Security
+
+The application uses HTTP Basic Authentication.
+
+The database is initialized with two users:
+
+* `admin` / `admin` — `ROLE_ADMIN`
+* `user` / `user` — `ROLE_USER`
+
+Administrators have access to all endpoints.
+
+Regular users cannot access the user management endpoints or perform delete and export operations.
+
+## ETags
+
+The API supports shallow ETags for GET requests.
+
+The ETag returned by a GET request can be sent back using the `If-None-Match` request header.
+
+If the resource has not changed, the API returns:
+
+```text
+304 Not Modified
+```
+
+with no response body.
+
+## Testing
+
+The project contains unit and integration tests using JUnit 5, Mockito and Spring Test.
+
+Run the tests with:
+
+```bash
+./gradlew test
+```
+
+Build the application with:
+
+```bash
+./gradlew clean build
+```

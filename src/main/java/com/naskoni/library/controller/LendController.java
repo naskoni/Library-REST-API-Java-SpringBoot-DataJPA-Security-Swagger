@@ -3,7 +3,9 @@ package com.naskoni.library.controller;
 import com.naskoni.library.dto.LendRequestDto;
 import com.naskoni.library.dto.LendResponseDto;
 import com.naskoni.library.service.LendService;
-import io.swagger.annotations.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -11,15 +13,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-@Api(tags = "Lends")
+@Tag(name = "Lends")
 @Slf4j
 @RestController
 @RequestMapping("/lends")
 @Secured({"ROLE_USER", "ROLE_ADMIN"})
-@CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 public class LendController {
 
@@ -27,68 +35,71 @@ public class LendController {
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
-  @ApiOperation(value = "Create new lend", response = LendResponseDto.class)
+  @Operation(summary = "Create new lend")
   public LendResponseDto create(
-      @Validated @RequestBody @ApiParam(value = "Lend object") LendRequestDto lendRequestDto) {
-    log.info("Create lend request: " + lendRequestDto.toString());
+      @Validated
+      @RequestBody
+      @Parameter(description = "Lend object")
+      LendRequestDto lendRequestDto) {
+
+    log.info("Create lend request: {}", lendRequestDto);
+
     LendResponseDto lendResponseDto = lendService.create(lendRequestDto);
-    log.info("Created lend response: " + lendResponseDto.toString());
+
+    log.info("Created lend response: {}", lendResponseDto);
+
     return lendResponseDto;
   }
 
   @PutMapping("/{id}")
-  @ApiOperation(value = "Update existing lend", response = LendResponseDto.class)
+  @Operation(summary = "Update existing lend")
   public LendResponseDto update(
-      @PathVariable @ApiParam(value = "The id of the lend for update") Long id,
-      @Validated @RequestBody @ApiParam(value = "Lend object") LendRequestDto lendRequestDto) {
-    log.info("Update lend request: " + lendRequestDto.toString());
+      @PathVariable
+      @Parameter(description = "The id of the lend for update")
+      Long id,
+
+      @Validated
+      @RequestBody
+      @Parameter(description = "Lend object")
+      LendRequestDto lendRequestDto) {
+
+    log.info("Update lend request: {}", lendRequestDto);
+
     LendResponseDto lendResponseDto = lendService.update(id, lendRequestDto);
-    log.info("Updated lend response: " + lendResponseDto.toString());
+
+    log.info("Updated lend response: {}", lendResponseDto);
+
     return lendResponseDto;
   }
 
   @GetMapping("/{id}")
-  @ApiOperation(value = "Find lend by id")
+  @Operation(summary = "Find lend by id")
   public LendResponseDto findOne(
-      @PathVariable @ApiParam(value = "The id of the lend to retrieve") Long id) {
+      @PathVariable
+      @Parameter(description = "The id of the lend to retrieve")
+      Long id) {
+
     return lendService.findOne(id);
   }
 
   @GetMapping
-  @ApiOperation(
-      value = "Find all lends",
-      notes = "Retrieves a list of all lends. Supports paging and sorting (optional).",
-      responseContainer = "List",
-      response = LendResponseDto.class)
-  @ApiImplicitParams({
-    @ApiImplicitParam(
-        name = "page",
-        dataType = "int",
-        paramType = "query",
-        value = "The number of the results page you want to retrieve (0..N)."),
-    @ApiImplicitParam(
-        name = "size",
-        dataType = "int",
-        paramType = "query",
-        value = "Number of records per page."),
-    @ApiImplicitParam(
-        name = "sort",
-        allowMultiple = true,
-        dataType = "string",
-        paramType = "query",
-        value =
-            "Sorting criteria in the format: property(,asc|desc). "
-                + "Default sort order is ascending. "
-                + "Multiple sort criteria are supported.")
-  })
+  @Operation(
+      summary = "Find all lends",
+      description = "Retrieves a list of all lends. Supports paging and sorting (optional)."
+  )
   public Page<LendResponseDto> findAll(
-      @ApiParam(
-              name = "search",
-              value = "Search query by Lend property, supported operations are >, <, :",
-              example = "lendingDate:2020-01-01")
-          @RequestParam(value = "search", required = false)
-          String search,
-      @ApiIgnore Pageable pageable) {
+
+      @Parameter(
+          name = "search",
+          description = "Search query by Lend property, supported operations are >, <, :",
+          example = "lendingDate:2020-01-01"
+      )
+      @RequestParam(value = "search", required = false)
+      String search,
+
+      @Parameter(hidden = true)
+      Pageable pageable) {
+
     return lendService.findAll(search, pageable);
   }
 }

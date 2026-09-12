@@ -1,9 +1,8 @@
 package com.naskoni.library.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
-
 import java.util.Date;
+import lombok.Data;
 
 @Data
 public abstract class AbstractResponseDto {

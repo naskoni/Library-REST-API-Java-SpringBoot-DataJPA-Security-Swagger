@@ -1,7 +1,6 @@
 package com.naskoni.library.service.impl;
 
 import com.google.common.hash.Hashing;
-import com.naskoni.library.repository.UserRepository;
 import com.naskoni.library.dto.UserRequestDto;
 import com.naskoni.library.dto.UserResponseDto;
 import com.naskoni.library.entity.User;
@@ -10,9 +9,13 @@ import com.naskoni.library.exception.CurrentlyInUseException;
 import com.naskoni.library.exception.DuplicateException;
 import com.naskoni.library.exception.NotFoundException;
 import com.naskoni.library.exception.UserDeactivatedException;
+import com.naskoni.library.repository.UserRepository;
 import com.naskoni.library.security.AuthenticationFacade;
 import com.naskoni.library.service.UserService;
 import com.naskoni.library.specification.SpecificationsBuilder;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+import java.util.regex.Matcher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -20,10 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.util.regex.Matcher;
 
 @Service
 @RequiredArgsConstructor
