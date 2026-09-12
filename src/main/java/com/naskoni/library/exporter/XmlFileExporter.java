@@ -8,12 +8,11 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * This implementation of Exporter is exemplary to demonstrate the ability of the application to
- * expand. The compiled class is placed in the 'pluginClasses' directory, whose location is defined
- * in application.properties and will be loaded via classloader when the application is started.
- *
- * @author Atanas Atanasov
- * @version 1.0.0
+ * XML implementation of {@link Exporter}.
+ * <p>
+ * This exporter is exemplary to demonstrate the ability of the application to expand. The compiled class can be placed in the
+ * {@code pluginClasses} directory, whose location is defined in application.properties and will be loaded via classloader when
+ * the application is started.
  */
 public class XmlFileExporter implements Exporter {
 

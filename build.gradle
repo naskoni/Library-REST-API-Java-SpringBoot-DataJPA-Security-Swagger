@@ -1,12 +1,17 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '2.5.14'
-    id 'io.spring.dependency-management' version '1.1.0'
+    id 'org.springframework.boot' version '4.1.1'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'com.naskoni'
-version = '1.0.0'
-sourceCompatibility = '19'
+version = '2.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(26)
+    }
+}
 
 configurations {
     compileOnly {
@@ -19,31 +24,33 @@ repositories {
 }
 
 dependencies {
+
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'com.google.guava:guava:29.0-jre'
-    implementation 'org.hibernate.validator:hibernate-validator'
-    implementation 'org.apache.commons:commons-lang3:3.10'
-    implementation 'commons-io:commons-io:2.6'
-    implementation 'commons-codec:commons-codec:1.14'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.11.0'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.11.0'
-    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
-    implementation 'io.springfox:springfox-bean-validators:2.9.2'
-    implementation 'io.springfox:springfox-swagger2:2.9.2'
-    compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'mysql:mysql-connector-java'
-    runtimeOnly 'com.h2database:h2:1.4.200'
+
+    implementation 'com.google.guava:guava:33.6.0-jre'
+    implementation 'org.apache.commons:commons-lang3:3.20.0'
+    implementation 'commons-io:commons-io:2.21.0'
+    implementation 'commons-codec:commons-codec:1.21.0'
+
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1'
+
+    compileOnly 'org.projectlombok:lombok:1.18.42'
+    annotationProcessor 'org.projectlombok:lombok:1.18.42'
+
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
-        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-    }
-    testImplementation 'com.google.code.gson:gson:2.8.6'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.google.code.gson:gson:2.13.2'
 }
 
 tasks.named('test') {

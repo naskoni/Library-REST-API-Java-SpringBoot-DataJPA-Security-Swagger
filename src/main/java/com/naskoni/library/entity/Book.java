@@ -1,11 +1,10 @@
 package com.naskoni.library.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -19,6 +18,7 @@ public class Book extends AbstractEntity {
   @Column(nullable = false, length = 50)
   private String author;
 
+  @Column(name = "book_year")
   private Integer year;
 
   @Column(length = 13)

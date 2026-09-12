@@ -8,11 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Exports books records as CSV file
- *
- * @return byte array representing the content of the CSV file
- * @author Atanas Atanasov
- * @version 1.0.0
+ * Exports book records as CSV file
  */
 public class CsvFileExporter implements Exporter {
 
@@ -24,16 +20,25 @@ public class CsvFileExporter implements Exporter {
     return CSV;
   }
 
+  /**
+   * Exports books as CSV
+   *
+   * @param books books to export
+   * @return byte array representing the CSV content
+   * @throws IOException if the CSV cannot be generated
+   */
   @Override
   public byte[] export(List<Book> books) throws IOException {
     CsvMapper csvMapper = new CsvMapper();
-    CsvSchema schema =
-        csvMapper
-            .schemaFor(Book.class)
-            .withoutQuoteChar()
-            .withHeader()
-            .withColumnSeparator(COLUMN_SEPARATOR_CSV);
 
-    return csvMapper.writer(schema).writeValueAsBytes(books);
+    CsvSchema schema = csvMapper
+        .schemaFor(Book.class)
+        .withoutQuoteChar()
+        .withHeader()
+        .withColumnSeparator(COLUMN_SEPARATOR_CSV);
+
+    return csvMapper
+        .writer(schema)
+        .writeValueAsBytes(books);
   }
 }

@@ -1,11 +1,10 @@
 package com.naskoni.library.specification;
 
 import com.naskoni.library.entity.AbstractEntity;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.CollectionUtils;
 
 public class SpecificationsBuilder<T extends AbstractEntity> {
 

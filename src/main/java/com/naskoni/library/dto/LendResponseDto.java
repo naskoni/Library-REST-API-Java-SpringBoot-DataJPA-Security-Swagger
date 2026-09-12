@@ -1,10 +1,9 @@
 package com.naskoni.library.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import java.sql.Date;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.sql.Date;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

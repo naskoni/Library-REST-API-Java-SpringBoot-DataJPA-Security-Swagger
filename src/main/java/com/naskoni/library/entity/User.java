@@ -2,10 +2,13 @@ package com.naskoni.library.entity;
 
 import com.naskoni.library.enumeration.Role;
 import com.naskoni.library.enumeration.Status;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import javax.persistence.*;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

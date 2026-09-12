@@ -1,18 +1,17 @@
 package com.naskoni.library.specification;
 
 import com.naskoni.library.entity.AbstractEntity;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 public class SearchSpecification<T extends AbstractEntity> implements Specification<T> {
 
   private static final long serialVersionUID = -7349634658746608071L;
 
-  private transient SearchCriteria criteria;
+  private final transient SearchCriteria criteria;
 
   public SearchSpecification(SearchCriteria searchCriteria) {
     this.criteria = searchCriteria;

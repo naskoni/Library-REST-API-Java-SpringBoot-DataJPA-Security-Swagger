@@ -1,13 +1,12 @@
 package com.naskoni.library.dto;
 
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import java.sql.Date;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-import java.sql.Date;
 
 @Data
 public class ClientRequestDto {

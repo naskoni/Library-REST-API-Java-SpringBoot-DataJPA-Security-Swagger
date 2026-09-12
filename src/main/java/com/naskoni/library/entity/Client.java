@@ -1,10 +1,13 @@
 package com.naskoni.library.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.sql.Date;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import javax.persistence.*;
-import java.sql.Date;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

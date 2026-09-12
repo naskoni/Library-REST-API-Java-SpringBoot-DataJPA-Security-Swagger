@@ -1,68 +1,77 @@
 package com.naskoni.library.config;
 
 import com.google.common.hash.Hashing;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import java.nio.charset.StandardCharsets;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.nio.charset.StandardCharsets;
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true)
+@EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
   @Bean
-  public ApplicationSecurity applicationSecurity() {
-    return new ApplicationSecurity();
+  public PasswordEncoder passwordEncoder() {
+    return new PasswordEncoder() {
+      @Override
+      public String encode(CharSequence rawPassword) {
+        return Hashing.sha256()
+            .hashString(rawPassword, StandardCharsets.UTF_8)
+            .toString();
+      }
+
+      @Override
+      public boolean matches(CharSequence rawPassword, String encodedPassword) {
+        return encodedPassword.equals(
+            Hashing.sha256()
+                .hashString(rawPassword, StandardCharsets.UTF_8)
+                .toString()
+        );
+      }
+    };
   }
 
-  @Order(SecurityProperties.BASIC_AUTH_ORDER)
-  public static class ApplicationSecurity extends WebSecurityConfigurerAdapter {
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) {
 
-    PasswordEncoder sha256PasswordEncoder =
-        new PasswordEncoder() {
-          @Override
-          public String encode(CharSequence rawPassword) {
-            return Hashing.sha256().hashString(rawPassword, StandardCharsets.UTF_8).toString();
-          }
+    http
+        .csrf(AbstractHttpConfigurer::disable)
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html",
+                "/actuator/health",
+                "/actuator/info"
+            ).permitAll()
+            .requestMatchers("/api/**").authenticated()
+            .anyRequest().permitAll()
+        )
+        .httpBasic(Customizer.withDefaults())
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        );
 
-          @Override
-          public boolean matches(CharSequence rawPassword, String encodedPassword) {
-            return encodedPassword.equals(
-                Hashing.sha256().hashString(rawPassword, StandardCharsets.UTF_8).toString());
-          }
-        };
+    return http.build();
+  }
 
-    @Autowired private UserDetailsService userDetailsService;
+  @Bean
+  public org.springframework.security.authentication.AuthenticationProvider authenticationProvider(
+      UserDetailsService userDetailsService,
+      PasswordEncoder passwordEncoder) {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-      http.csrf()
-          .disable()
-          .authorizeRequests()
-          .antMatchers("/api/**")
-          .authenticated()
-          .and()
-          .httpBasic()
-          .and()
-          .sessionManagement()
-          .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-    }
+    var provider =
+        new org.springframework.security.authentication.dao.DaoAuthenticationProvider(userDetailsService);
 
-    @Override
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
-      auth.userDetailsService(userDetailsService).passwordEncoder(sha256PasswordEncoder);
-    }
+    provider.setPasswordEncoder(passwordEncoder);
+
+    return provider;
   }
 }
