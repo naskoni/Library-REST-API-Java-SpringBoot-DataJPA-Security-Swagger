@@ -2,6 +2,7 @@ package com.naskoni.library.exporter;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.naskoni.library.entity.Book;
 
 import java.io.IOException;
@@ -30,6 +31,7 @@ public class CsvFileExporter implements Exporter {
   @Override
   public byte[] export(List<Book> books) throws IOException {
     CsvMapper csvMapper = new CsvMapper();
+    csvMapper.registerModule(new JavaTimeModule());
 
     CsvSchema schema = csvMapper
         .schemaFor(Book.class)

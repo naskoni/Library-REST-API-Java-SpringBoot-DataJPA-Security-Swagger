@@ -5,7 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.sql.Date;
+import java.time.LocalDate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -20,7 +20,7 @@ public class Client extends AbstractEntity {
 
   private String pid;
 
-  private Date birthdate;
+  private LocalDate birthdate;
 
   @ManyToOne
   @JoinColumn(name = "created_by")
