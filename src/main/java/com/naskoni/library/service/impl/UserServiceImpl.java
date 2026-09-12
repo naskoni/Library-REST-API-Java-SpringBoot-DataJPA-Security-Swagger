@@ -14,7 +14,6 @@ import com.naskoni.library.security.AuthenticationFacade;
 import com.naskoni.library.service.UserService;
 import com.naskoni.library.specification.SpecificationsBuilder;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -40,79 +39,75 @@ public class UserServiceImpl implements UserService {
   @Transactional
   @Override
   public UserResponseDto create(UserRequestDto userRequestDto) {
-    Optional<User> optionalUser = userRepository.findByUsername(userRequestDto.getUsername());
-    if (optionalUser.isPresent()) {
-      throw new DuplicateException(USERNAME_EXIST.formatted(userRequestDto.getUsername()));
+    var existingUser = userRepository.findByUsername(userRequestDto.getUsername());
+    if (existingUser.isPresent()) {
+      throw new DuplicateException(
+          USERNAME_EXIST.formatted(userRequestDto.getUsername()));
     }
 
-    String enteredPassword = userRequestDto.getPassword();
-    String encryptedPassword =
-        Hashing.sha256().hashString(enteredPassword, StandardCharsets.UTF_8).toString();
+    var encryptedPassword = Hashing.sha256()
+        .hashString(userRequestDto.getPassword(), StandardCharsets.UTF_8)
+        .toString();
     userRequestDto.setPassword(encryptedPassword);
 
-    User user = mapToEntity(userRequestDto);
+    var user = mapToEntity(userRequestDto);
     user.setStatus(Status.ACTIVE);
-    User savedUser = userRepository.save(user);
+
+    var savedUser = userRepository.save(user);
     return mapToDto(savedUser);
   }
 
   @Transactional
   @Override
   public UserResponseDto update(Long id, UserRequestDto userRequestDto) {
-    Optional<User> optionalUser = userRepository.findById(id);
-    if (optionalUser.isPresent()) {
-      User user = optionalUser.get();
-      Optional<User> optionalbyUsername = userRepository.findByUsername(userRequestDto.getUsername());
-      if (optionalbyUsername.isPresent() && !optionalbyUsername.get().getId().equals(id)) {
-        throw new DuplicateException(USERNAME_EXIST.formatted(userRequestDto.getUsername()));
-      }
+    var user = userRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.formatted(id)));
 
-      String enteredPassword = userRequestDto.getPassword();
-      String encryptedPassword =
-          Hashing.sha256().hashString(enteredPassword, StandardCharsets.UTF_8).toString();
-      userRequestDto.setPassword(encryptedPassword);
-
-      BeanUtils.copyProperties(userRequestDto, user);
-
-      User savedUser = userRepository.save(user);
-      return mapToDto(savedUser);
-    } else {
-      throw new NotFoundException(USER_NOT_FOUND.formatted(id));
+    var existingUser = userRepository.findByUsername(userRequestDto.getUsername());
+    if (existingUser.isPresent() && !existingUser.get().getId().equals(id)) {
+      throw new DuplicateException(
+          USERNAME_EXIST.formatted(userRequestDto.getUsername()));
     }
+
+    var encryptedPassword = Hashing.sha256()
+        .hashString(userRequestDto.getPassword(), StandardCharsets.UTF_8)
+        .toString();
+    userRequestDto.setPassword(encryptedPassword);
+
+    BeanUtils.copyProperties(userRequestDto, user);
+
+    var savedUser = userRepository.save(user);
+    return mapToDto(savedUser);
   }
 
   @Transactional
   @Override
   public UserResponseDto deactivate(Long id) {
-    Optional<User> userOptional = userRepository.findById(id);
-    if (userOptional.isPresent()) {
-      User user = userOptional.get();
-      if (user.getStatus() == Status.DEACTIVATED) {
-        throw new UserDeactivatedException(USER_ALREADY_DEACTIVATED.formatted(id));
-      }
+    var user = userRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.formatted(id)));
 
-      String loggedUsername = authenticationFacade.getAuthentication().getName();
-      if (user.getUsername().equals(loggedUsername)) {
-        throw new CurrentlyInUseException(USER_IN_USE.formatted(id));
-      }
-
-      user.setStatus(Status.DEACTIVATED);
-      User savedUser = userRepository.save(user);
-      return mapToDto(savedUser);
-    } else {
-      throw new NotFoundException(USER_NOT_FOUND.formatted(id));
+    if (user.getStatus() == Status.DEACTIVATED) {
+      throw new UserDeactivatedException(USER_ALREADY_DEACTIVATED.formatted(id));
     }
+
+    var loggedUsername = authenticationFacade.getAuthentication().getName();
+    if (user.getUsername().equals(loggedUsername)) {
+      throw new CurrentlyInUseException(USER_IN_USE.formatted(id));
+    }
+
+    user.setStatus(Status.DEACTIVATED);
+
+    var savedUser = userRepository.save(user);
+    return mapToDto(savedUser);
   }
 
   @Transactional(readOnly = true)
   @Override
   public UserResponseDto findOne(Long id) {
-    Optional<User> optionalUser = userRepository.findById(id);
-    if (optionalUser.isPresent()) {
-      return mapToDto(optionalUser.get());
-    } else {
-      throw new NotFoundException(USER_NOT_FOUND.formatted(id));
-    }
+    var user = userRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.formatted(id)));
+
+    return mapToDto(user);
   }
 
   @Transactional(readOnly = true)
@@ -120,12 +115,14 @@ public class UserServiceImpl implements UserService {
   public Page<UserResponseDto> findAll(String search, Pageable pageable) {
     SpecificationsBuilder<User> builder = new SpecificationsBuilder<>();
     Matcher matcher = Helper.getMatcher(search);
+
     while (matcher.find()) {
       builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
     }
 
     Specification<User> spec = builder.build();
     Page<User> users = userRepository.findAll(spec, pageable);
+
     return users.map(this::mapToDto);
   }
 
