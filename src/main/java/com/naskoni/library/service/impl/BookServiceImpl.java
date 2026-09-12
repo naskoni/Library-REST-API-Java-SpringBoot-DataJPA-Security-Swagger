@@ -55,7 +55,7 @@ public class BookServiceImpl implements BookService {
       Book savedBook = bookRepository.save(book);
       return mapToDto(savedBook);
     } else {
-      throw new NotFoundException(String.format(BOOK_NOT_FOUND, id));
+      throw new NotFoundException(BOOK_NOT_FOUND.formatted(id));
     }
   }
 
@@ -67,12 +67,12 @@ public class BookServiceImpl implements BookService {
       Book book = optionalBook.get();
       Optional<Lend> lendOptional = lendRepository.findByBook(book);
       if (lendOptional.isPresent()) {
-        throw new CurrentlyInUseException(String.format(BOOK_IN_USE, id));
+        throw new CurrentlyInUseException(BOOK_IN_USE.formatted(id));
       }
 
       bookRepository.delete(book);
     } else {
-      throw new NotFoundException(String.format(BOOK_NOT_FOUND, id));
+      throw new NotFoundException(BOOK_NOT_FOUND.formatted(id));
     }
   }
 
@@ -83,7 +83,7 @@ public class BookServiceImpl implements BookService {
     if (optionalBook.isPresent()) {
       return mapToDto(optionalBook.get());
     } else {
-      throw new NotFoundException(String.format(BOOK_NOT_FOUND, id));
+      throw new NotFoundException(BOOK_NOT_FOUND.formatted(id));
     }
   }
 

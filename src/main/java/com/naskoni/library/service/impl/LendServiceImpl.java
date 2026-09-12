@@ -54,7 +54,7 @@ public class LendServiceImpl implements LendService {
       Lend savedLend = lendRepository.save(lend);
       return mapToDto(savedLend);
     } else {
-      throw new NotFoundException(String.format(LEND_NOT_FOUND, id));
+      throw new NotFoundException(LEND_NOT_FOUND.formatted(id));
     }
   }
 
@@ -65,7 +65,7 @@ public class LendServiceImpl implements LendService {
     if (optionalLend.isPresent()) {
       return mapToDto(optionalLend.get());
     } else {
-      throw new NotFoundException(String.format(LEND_NOT_FOUND, id));
+      throw new NotFoundException(LEND_NOT_FOUND.formatted(id));
     }
   }
 
@@ -105,14 +105,14 @@ public class LendServiceImpl implements LendService {
     if (optionalBook.isPresent()) {
       lend.setBook(optionalBook.get());
     } else {
-      throw new NotFoundException(String.format(BOOK_NOT_FOUND, lendRequestDto.getBookId()));
+      throw new NotFoundException(BOOK_NOT_FOUND.formatted(lendRequestDto.getBookId()));
     }
 
     Optional<Client> optionalClient = clientRepository.findById(lendRequestDto.getClientId());
     if (optionalClient.isPresent()) {
       lend.setClient(optionalClient.get());
     } else {
-      throw new NotFoundException(String.format(CLIENT_NOT_FOUND, lendRequestDto.getClientId()));
+      throw new NotFoundException(CLIENT_NOT_FOUND.formatted(lendRequestDto.getClientId()));
     }
 
     return lend;

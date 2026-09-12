@@ -58,7 +58,7 @@ public class ClientServiceImpl implements ClientService {
       Client savedClient = clientRepository.save(client);
       return mapToDto(savedClient);
     } else {
-      throw new NotFoundException(String.format(CLIENT_NOT_FOUND, id));
+      throw new NotFoundException(CLIENT_NOT_FOUND.formatted(id));
     }
   }
 
@@ -70,12 +70,12 @@ public class ClientServiceImpl implements ClientService {
       Client client = optionalClient.get();
       Optional<Lend> lendOptional = lendRepository.findByClient(client);
       if (lendOptional.isPresent()) {
-        throw new CurrentlyInUseException(String.format(CLIENT_IN_USE, id));
+        throw new CurrentlyInUseException(CLIENT_IN_USE.formatted(id));
       }
 
       clientRepository.delete(optionalClient.get());
     } else {
-      throw new NotFoundException(String.format(CLIENT_NOT_FOUND, id));
+      throw new NotFoundException(CLIENT_NOT_FOUND.formatted(id));
     }
   }
 
@@ -86,7 +86,7 @@ public class ClientServiceImpl implements ClientService {
     if (optionalClient.isPresent()) {
       return mapToDto(optionalClient.get());
     } else {
-      throw new NotFoundException(String.format(CLIENT_NOT_FOUND, id));
+      throw new NotFoundException(CLIENT_NOT_FOUND.formatted(id));
     }
   }
 

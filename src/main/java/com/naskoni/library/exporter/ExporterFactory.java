@@ -23,8 +23,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExporterFactory {
 
+  public static final String NO_EXPORTER_IS_REGISTERED_FOR_THIS_TYPE = "No exporter is registered for this type: %s";
   private static final String PACKAGE_NAME = "com.naskoni.library.exporter.";
-
   private final Map<String, Class<? extends Exporter>> classMap = new HashMap<>();
 
   private URLClassLoader loader;
@@ -54,7 +54,7 @@ public class ExporterFactory {
       }
     }
 
-    throw new NotFoundException(String.format("No exporter is registered for this type: %s", type));
+    throw new NotFoundException(NO_EXPORTER_IS_REGISTERED_FOR_THIS_TYPE.formatted(type));
   }
 
   public Set<String> getTypes() {

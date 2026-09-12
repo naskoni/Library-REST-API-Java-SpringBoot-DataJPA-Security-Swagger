@@ -30,7 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     Preconditions.checkNotNull(username);
     Optional<User> userOptional = userRepository.findByUsername(username);
     if (userOptional.isEmpty() || userOptional.get().getStatus() == Status.DEACTIVATED) {
-      throw new UsernameNotFoundException(String.format(USER_NOT_FOUND, username));
+      throw new UsernameNotFoundException(USER_NOT_FOUND.formatted(username));
     }
 
     User user = userOptional.get();

@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
   public UserResponseDto create(UserRequestDto userRequestDto) {
     Optional<User> optionalUser = userRepository.findByUsername(userRequestDto.getUsername());
     if (optionalUser.isPresent()) {
-      throw new DuplicateException(String.format(USERNAME_EXIST, userRequestDto.getUsername()));
+      throw new DuplicateException(USERNAME_EXIST.formatted(userRequestDto.getUsername()));
     }
 
     String enteredPassword = userRequestDto.getPassword();
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
       User user = optionalUser.get();
       Optional<User> optionalbyUsername = userRepository.findByUsername(userRequestDto.getUsername());
       if (optionalbyUsername.isPresent() && !optionalbyUsername.get().getId().equals(id)) {
-        throw new DuplicateException(String.format(USERNAME_EXIST, userRequestDto.getUsername()));
+        throw new DuplicateException(USERNAME_EXIST.formatted(userRequestDto.getUsername()));
       }
 
       String enteredPassword = userRequestDto.getPassword();
@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
       User savedUser = userRepository.save(user);
       return mapToDto(savedUser);
     } else {
-      throw new NotFoundException(String.format(USER_NOT_FOUND, id));
+      throw new NotFoundException(USER_NOT_FOUND.formatted(id));
     }
   }
 
@@ -88,19 +88,19 @@ public class UserServiceImpl implements UserService {
     if (userOptional.isPresent()) {
       User user = userOptional.get();
       if (user.getStatus() == Status.DEACTIVATED) {
-        throw new UserDeactivatedException(String.format(USER_ALREADY_DEACTIVATED, id));
+        throw new UserDeactivatedException(USER_ALREADY_DEACTIVATED.formatted(id));
       }
 
       String loggedUsername = authenticationFacade.getAuthentication().getName();
       if (user.getUsername().equals(loggedUsername)) {
-        throw new CurrentlyInUseException(String.format(USER_IN_USE, id));
+        throw new CurrentlyInUseException(USER_IN_USE.formatted(id));
       }
 
       user.setStatus(Status.DEACTIVATED);
       User savedUser = userRepository.save(user);
       return mapToDto(savedUser);
     } else {
-      throw new NotFoundException(String.format(USER_NOT_FOUND, id));
+      throw new NotFoundException(USER_NOT_FOUND.formatted(id));
     }
   }
 
@@ -111,7 +111,7 @@ public class UserServiceImpl implements UserService {
     if (optionalUser.isPresent()) {
       return mapToDto(optionalUser.get());
     } else {
-      throw new NotFoundException(String.format(USER_NOT_FOUND, id));
+      throw new NotFoundException(USER_NOT_FOUND.formatted(id));
     }
   }
 
