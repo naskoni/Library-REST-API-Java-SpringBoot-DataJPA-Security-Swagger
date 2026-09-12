@@ -14,8 +14,8 @@ public class LendsCreator {
     lend.setId(1L);
     lend.setClient(ClientsCreator.getClient());
     lend.setBook(BooksCreator.getBook());
-    lend.setLendingDate(LocalDate.now());
-    lend.setReturnDate(LocalDate.now());
+    lend.setLendingDate(LocalDate.of(2019, 12, 31));
+    lend.setReturnDate(LocalDate.of(2020, 1, 1));
     return lend;
   }
 
@@ -23,8 +23,8 @@ public class LendsCreator {
     var lend = new LendRequestDto();
     lend.setBookId(1L);
     lend.setClientId(1L);
-    lend.setLendingDate(LocalDate.now());
-    lend.setReturnDate(LocalDate.now());
+    lend.setLendingDate(LocalDate.of(2019, 12, 31));
+    lend.setReturnDate(LocalDate.of(2020, 1, 1));
     return lend;
   }
 
@@ -33,8 +33,8 @@ public class LendsCreator {
     lend.setId(1L);
     lend.setBook(BooksCreator.getBookResponseDto());
     lend.setClient(ClientsCreator.getClientResponseDto());
-    lend.setLendingDate(LocalDate.now());
-    lend.setReturnDate(LocalDate.now());
+    lend.setLendingDate(LocalDate.of(2019, 12, 31));
+    lend.setReturnDate(LocalDate.of(2020, 1, 1));
     return lend;
   }
 
@@ -43,7 +43,6 @@ public class LendsCreator {
     for (int i = 0; i < 10; i++) {
       lends.add(getLendResponseDto());
     }
-
     return lends;
   }
 }

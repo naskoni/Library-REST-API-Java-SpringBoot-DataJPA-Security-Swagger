@@ -13,7 +13,7 @@ public class ClientsCreator {
   public static ClientRequestDto getClientRequestDto() {
     var client = new ClientRequestDto();
     client.setName("name");
-    client.setBirthdate(LocalDate.now().minusYears(20));
+    client.setBirthdate(LocalDate.of(2006, 9, 12));
     client.setPid("1645712740");
     return client;
   }
@@ -22,7 +22,7 @@ public class ClientsCreator {
     var client = new ClientResponseDto();
     client.setId(1L);
     client.setName("Max Max");
-    client.setBirthdate(LocalDate.now().minusYears(20));
+    client.setBirthdate(LocalDate.of(2006, 9, 12));
     client.setPid("1645712740");
     client.setCreatedBy("admin");
     return client;
@@ -41,8 +41,8 @@ public class ClientsCreator {
     var client = new Client();
     client.setId(1L);
     client.setName("name");
-    client.setBirthdate(LocalDate.now().minusYears(20));
-    client.setPid("164571274");
+    client.setBirthdate(LocalDate.of(2006, 9, 12));
+    client.setPid("1645712740");
     client.setCreatedBy(new User());
     return client;
   }

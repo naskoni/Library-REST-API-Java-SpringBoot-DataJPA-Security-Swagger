@@ -1,5 +1,6 @@
 package com.naskoni.library.controller;
 
+import static com.naskoni.library.util.GsonTestUtil.createGson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -59,7 +60,7 @@ class BookControllerTest {
 
   private static final String SUPPORTED_FILE_TYPES = "{\"supportedFileTypes\":[\"csv\",\"xls\"]}";
 
-  private final Gson gson = new Gson();
+  private final Gson gson = createGson();
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   private MockMvc mockMvc;
